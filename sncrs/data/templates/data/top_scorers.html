@@ -1,0 +1,36 @@
+<table class="table table-bordered border-dark bg-dark text-light text-center align-middle table-responsive">
+  <thead>
+    <tr>
+      <th colspan="3" style="background-color:black" scope="col"> Top Scorers </th>
+    <tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="background-color:#FFD700; color:black;">
+        {% if snapshot_set.0.person != None %}
+          {{snapshot_set.0.person}}
+        {% else %}
+          No current data
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td style="background-color:#C0C0C0; color:black;">
+        {% if snapshot_set.1.person != None %}
+          {{snapshot_set.1.person}}
+        {% else %}
+          No current data
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td style="background-color:#CD7F32; color:black;">
+        {% if snapshot_set.2.person != None %}
+          {{snapshot_set.2.person}}
+        {% else %}
+          No current data
+        {% endif %}
+      </td>
+    </tr>
+  </tbody>
+</table>

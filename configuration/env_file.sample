@@ -1,0 +1,8 @@
+export DJANGO_SECRET_KEY='your-value-here'
+export SNCRS_URL='example.website.com'
+export CHALLONGE_USER="your-username-here"
+export CHALLONGE_KEY="your-challonge-key-here"
+export SNCRS_YOUTUBE_DEV_KEY="your-youtube-dev-key-here"
+export SNCRS_YOUTUBE_CHANNEL_ID="your-channel-id-here"
+export SNCRS_PRODUCTION_REPO_PATH="/custom/path/to/sncrs"
+export SNCRS_PRODUCTION_VENV_SITE_PACKAGES_PATH="/custom/path/to/env/lib/pythonX.X/site-packages"

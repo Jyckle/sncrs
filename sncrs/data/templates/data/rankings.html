@@ -1,0 +1,66 @@
+{% load extra_filters %}
+{% load static %}
+<div class="container table-wrapper">
+  <table class="table table-dark table-striped table-hover text-center table-sticky align-middle">
+    <thead>
+      <tr class="sticky-top-row black-bg-row">
+        <th scope="col"></th>
+        <th scope="col">Rank</th>
+        <th scope="col">Score</th>
+        <th scope="col">Latest Changes</th>
+        <th scope="col">Tag</th>
+      </tr>
+      </thead>
+      <tbody>
+        {% if score_sorted_snapshots|length > 0 %}
+          {%for snapshot in score_sorted_snapshots %}
+            <tr height="50px">
+              {% if snapshot.end_rank|subtract:snapshot.start_rank < 0 %}
+                <td><img style="max-width:30px" src="https://www.pngkit.com/png/full/11-111195_free-icons-png-green-arrow-icon-png.png" class="img-fluid"></td>
+              {% elif snapshot.end_rank|subtract:snapshot.start_rank > 0 %}
+                <td><img style="max-width:30px" src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Descenso.png" class="img-fluid"></td>
+              {% else %}
+                <td>--</td>
+              {% endif %}
+              <td>{{snapshot.person.rank}}</td>
+              <td>{{snapshot.end_score}}</td>
+              {% if snapshot.end_score|subtract:snapshot.start_score > 0 %}
+                <td style="color:green">
+                  +{{snapshot.end_score|subtract:snapshot.start_score}}
+                </td>
+              {% elif snapshot.end_score|subtract:snapshot.start_score < 0 %}
+                <td style="color:red">
+                  {{snapshot.end_score|subtract:snapshot.start_score}}
+                </td>
+              {% else %}
+                <td>--</td>
+              {% endif %}
+              <td>{{snapshot.person.display_name}}
+                  {% if snapshot.person.get_status_display == 'Elite' %}
+                    <img style= "max-width:15px; max-height:15px" src="{% static 'data/elite_icon.png' %}">
+                  {% elif snapshot.person.get_status_display == 'Challenger' %}
+                    <img style= "max-width:15px; max-height:15px" src="{% static 'data/challenger_icon.png' %}">
+                  {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          {%for person in person_list %}
+            <tr>
+              <td></td>
+              <td>{{person.rank}}</td>
+              <td>{{person.score}}</td>
+              <td>--</td>
+              <td>{{person.display_name}}
+                {% if person.get_status_display == 'Elite' %}
+                    <img style= "max-width:15px; max-height:15px" src="{% static 'data/elite_icon.png' %}">
+                {% elif person.get_status_display == 'Challenger' %}
+                    <img style= "max-width:15px; max-height:15px" src="{% static 'data/challenger_icon.png' %}">
+                {% endif %}
+	      </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+  </table>
+</div>

@@ -1,0 +1,15 @@
+<div class="container">
+    <div class="col">
+        <div class="row" style="margin-bottom:10px">
+            <form method="post" action=""/>
+            Viewing data for season(s):
+                {% csrf_token %}
+                <select onchange="this.form.submit()" name = "season-select">
+                {% for season in season_list %}
+                    <option value="{{ season }}" {% if season == season_selection %}selected="selected"{% endif %}>{{season}}</option>
+                {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+</div>

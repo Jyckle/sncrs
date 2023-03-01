@@ -1,0 +1,157 @@
+#black-row>th {
+  background-color: black;
+}
+
+#bootstrap-overrides .table-wrapper.table-wrapper{
+  overflow:auto;
+  max-height:85vh;
+  max-width:85vw;
+  padding:0px;
+}
+
+#bootstrap-overrides .sticky-top{
+  position:-webkit-sticky;
+  position:sticky;
+  top:0;
+}
+
+#bootstrap-overrides .sticky-top-row th{
+  position:-webkit-sticky;
+  position:sticky;
+  top:0;
+  z-index: 2;
+  border-bottom: 1px solid;
+  border-left: None;
+  border-right: None;
+}
+
+#bootstrap-overrides .sticky-left{
+  position:-webkit-sticky;
+  position:sticky;
+  left:0;
+  border-bottom: None;
+  border-left: None;
+  border-top: None;
+  border-right: 1px solid white;
+}
+
+#bootstrap-overrides .black-bg{
+  background-color:black;
+}
+
+#bootstrap-overrides .black-bg-row th{
+  background-color:black;
+}
+
+#bootstrap-overrides .table-sticky{
+  border-collapse: separate;
+  border-spacing: 0px;
+  padding: 0px;
+}
+
+#bootstrap-overrides .table-sticky-bordered td{
+  border-bottom: 1px solid;
+}
+
+.backgroundLogo {
+  background-image: url("logo-dark.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 900px 600px;
+  background-attachment: fixed;
+}
+
+#containerLogo {
+  background-color: transparent;
+}
+
+#bootstrap-overrides .venueCell {
+  padding: 0px;
+  margin: 0px;
+  background-color: black;
+}
+
+#bootstrap-overrides .mySlides{
+  background-color:black;
+}
+
+#bootstrap-overrides .my2Slides2{
+  background-color:black;
+}
+
+#bootstrap-overrides .venuePic{
+  min-width: 300px;
+  min-height: 200px;
+  max-width: 400px;
+  max-height: 300px;
+}
+
+#bootstrap-overrides .venueRow{
+  height: 300px;
+}
+
+#bootstrap-overrides .demon.demon.demon{
+  background-color:red;
+}
+
+#bootstrap-overrides .rival.rival.rival {
+  background-color:blue;
+}
+
+#bootstrap-overrides .rankRow{
+  vertical-align: middle;
+  text-align: center;
+}
+
+#bootstrap-overrides .table-custom-striped tr:nth-child(odd) .rival.rival.rival{
+    background-color: darkblue;
+}
+
+#bootstrap-overrides .table-custom-striped tr:nth-child(odd) .demon.demon.demon{
+    background-color: darkred;
+}
+
+#bootstrap-overrides .table-custom-striped tr:nth-child(even) td,
+#bootstrap-overrides .table-custom-striped tr:nth-child(even) th{
+    background-color: #343a40;
+
+}
+
+#bootstrap-overrides .venueBio{
+  word-wrap: break-word;
+}
+
+#bootstrap-overrides .addressCell{
+  min-width: 300px;
+}
+
+#bootstrap-overrides .containerTrans{
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 15px;
+}
+
+#bootstrap-overrides .centerImg{
+  text-align: center;
+  max-width: 300px;
+  max-height: 300px;
+}
+
+#bootstrap-overrides .frameLink{
+  font-size: 23px;
+  font-family: 'Poppins', sans-serif;
+  color: black;
+  background-color: #ffc640;
+  border:  none;
+  border-bottom: 6px solid #ff9a40;
+  width: 300px;
+  height: 80px;
+}
+
+#bootstrap-overrides .frameLink:hover{
+  background-color: #dd9e0a;
+  border-bottom: 6px solid #d06506 ;
+}
+
+#bootstrap-overrides .frameHeading{
+  font-size: 18px;
+}

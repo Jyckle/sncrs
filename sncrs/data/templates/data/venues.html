@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h1 id="debug">SmashNight Venues</h1>
+{% endblock %}
+
+{% block content %}
+{% load extra_filters %}
+{% load static %}
+<div class="container">
+<div class="container table-wrapper">
+    <table class="table table-bordered border-light bg-dark text-light text-center align-middle table-responsive table-sticky table-sticky-bordered">
+      <thead>
+        <tr class="sticky-top-row black-bg-row">
+          <th scope="col"></th>
+          <th scope="col"> Name </th>
+          <th scope="col"> Description </th>
+        </tr>
+      </thead>
+      <tbody>
+         <!--  for venue in venue_set  -->
+        <tr class="venueRow">
+          <td scope="row" class="venueCell" onmouseenter="showSlides()" onmouseleave="resetSlides()">
+            <div class="mySlides"><img src="{% static 'data/HDP/HDP2.jpg' %}" alt="pic" class="venuePic"></div>
+            <div class="mySlides"><img src="{% static 'data/HDP/HDP5.jpg' %}" alt="pic" class="venuePic"></div>
+            <div class="mySlides"><img src="{% static 'data/HDP/HDP6.jpg' %}" alt="pic" class="venuePic"></div>
+            <div class="mySlides"><img src="{% static 'data/HDP/HDP7.jpg' %}" alt="pic" class="venuePic"></div>
+            <div class="mySlides"><img src="{% static 'data/HDP/HDP1.jpg' %}" alt="pic" class="venuePic"></div>
+          </td>
+          <td>Historic Dylan's Place</td>
+          <td class="venueBio">Grungy dungeon where it all began...</td>
+        </tr>
+        <tr class="venueRow">
+          <td scope="row" class="venueCell" onmouseenter="showSlides2()" onmouseleave="resetSlides2()">
+            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH1.jpg' %}" alt="pic" class="venuePic"></div>
+            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH2.jpg' %}" alt="pic" class="venuePic"></div>
+            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH3.jpg' %}" alt="pic" class="venuePic"></div>
+            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH4.jpg' %}" alt="pic" class="venuePic"></div>
+            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH5.jpg' %}" alt="pic" class="venuePic"></div>
+          </td>
+          <td>Pasquesi Smash House</td>
+          <td class="venueBio">A comfy lounge equipped with space and fun lighting</td>
+        </tr>
+        <!--  endfor  -->
+      </tbody>
+    </table>
+</div>
+</div>
+
+<script>
+var slideIndex = 1;
+var showRunning;
+setupSlides();
+
+function setupSlides(){
+  // document.getElementById("debug").innerHTML = "setup";
+  // var parentDiv = e.target;
+  var slides = document.getElementsByClassName("mySlides");
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  slides[0].style.display = "block";
+
+  slides = document.getElementsByClassName("my2Slides2");
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  slides[0].style.display = "block";
+}
+
+function showSlides() {
+  // document.getElementById("debug").innerHTML = "show";
+  var i;
+  var slides = document.getElementsByClassName("mySlides");
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  slideIndex++;
+  if (slideIndex > slides.length) {slideIndex = 1}
+  slides[slideIndex-1].style.display = "block";
+  showRunning = setTimeout(showSlides, 1500); // Change image every 1.5 seconds
+}
+
+function showSlides2() {
+  // document.getElementById("debug").innerHTML = "show";
+  var i;
+  var slides = document.getElementsByClassName("my2Slides2");
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  slideIndex++;
+  if (slideIndex > slides.length) {slideIndex = 1}
+  slides[slideIndex-1].style.display = "block";
+  showRunning = setTimeout(showSlides2, 1500); // Change image every 1.5 seconds
+}
+
+function resetSlides(){
+  clearTimeout(showRunning);
+  // document.getElementById("debug").innerHTML = "reset";
+  var slides = document.getElementsByClassName("mySlides");
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  slides[0].style.display = "block";
+  slideIndex = 1;
+}
+
+function resetSlides2(){
+  clearTimeout(showRunning);
+  // document.getElementById("debug").innerHTML = "reset";
+  var slides = document.getElementsByClassName("my2Slides2");
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  slides[0].style.display = "block";
+  slideIndex = 1;
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h1>Week By Week Scores</h1>
+{% endblock %}
+
+{% block content %}
+{% load extra_filters %}
+{% include 'data/season_selector.html' %}
+<div class="container">
+<div class="container table-wrapper">
+    <table class="table table-bordered border-light bg-dark text-light text-center align-middle table-responsive table-sticky table-sticky-bordered">
+      <thead>
+        <tr class="sticky-top-row black-bg-row">
+          <th scope="col"> TAG </th>
+          {% for sn in smashnight_set %}
+          <th scope="col"> Rank After {{sn.date}} </th>
+          <th scope="col"> Score After {{sn.date}} </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for person in person_list %}
+        <tr>
+          <th scope="row" class="sticky-left" style="background-color:{{person.team.team_color}};"> {{person.display_name}} </th>
+          {% for sn in smashnight_set %}
+              <td>{{sn|check_person_rank:person}}</td>
+              <td>{{sn|check_person_score:person}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+</div>
+</div>
+{% endblock %}

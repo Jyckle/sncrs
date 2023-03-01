@@ -1,0 +1,23 @@
+<table class="table table-bordered border-dark bg-dark text-light text-center table-responsive">
+  <thead>
+    <tr>
+      <th colspan="2" style="background-color:black" scope="col"> Retired Members </th>
+    <tr>
+  </thead>
+  <tbody>
+    {% load extra_filters %}
+    {% for team in team_list %}
+    <td style="padding:1px">
+      <table class="table table-bordered border-dark bg-dark text-light table-hover text-center">
+          <tbody>
+            {% for member in team.person_set|retired_filter %}
+                <tr>
+                    <td style="background-color:{{team.team_color}}; color:white;">{{member.display_name}}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+      </table>
+    </td>
+    {% endfor %}
+  </tbody>
+</table>

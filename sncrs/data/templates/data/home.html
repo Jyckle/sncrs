@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h1>Home</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      {% include 'data/rankings.html' %}
+    </div>
+    <div class="col">
+      <div class="row">
+      {% include 'data/medalists.html' %}
+      </div>
+      <div class="row">
+      {% include 'data/top_scorers.html' %}
+      </div>
+    </div>
+    <div class="col">
+      <div class="row">
+        {% include 'data/teams.html' %}
+      </div>
+      <div class="row">
+        {% include 'data/retired.html' %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

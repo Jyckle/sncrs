@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h1>Scoring</h1>
+{% endblock %}
+
+{% block content %}
+{% load extra_filters %}
+<div class="container">
+<div class="container table-wrapper">
+    <table class="table table-bordered border-light bg-dark text-light text-center align-middle table-responsive table-sticky">
+      <thead>
+        <tr class="sticky-top-row black-bg-row">
+          <th> Please select the individual you would like to see scoring data for. </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for person in person_list %}
+        <tr>
+            <td style="background-color:{{person.team.team_color}};"><a href="/scoring/{{person.id}}/" style="color:white">{{person.display_name}}</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+</div>
+</div>
+{% endblock %}

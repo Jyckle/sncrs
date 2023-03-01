@@ -1,0 +1,42 @@
+{% load extra_filters %}
+
+
+
+<div class="container">
+  <h3 style="border-bottom:1px solid white; text-align: center; background-color: black; margin-bottom:0px"> Matchups by Set </h3>
+<div class="container table-wrapper">
+    <table class="table table-bordered table-hover text-white border-white align-middle text-center separate-border table-sticky table-sticky-bordered">
+      <thead class="sticky-top-row black-bg-row">
+        <tr>
+          <th scope="col">  </th>
+          {% for person in person_list %}
+          <th scope="col">{{person.display_name}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {%for person in person_list %}
+        <tr>
+          <th class="sticky-left black-bg" style="color:white;" scope="row">{{person.display_name}}</th>
+          {% for person_y in person_list %}
+              {% with matchup=person|get_matchup:person_y %}
+              {% if matchup == None %}
+                <td style="background-color:#333333; color:white;">
+              {% elif matchup.px_set_wins|add:matchup.px_additional_set_wins != 0 or matchup.py_set_wins|add:matchup.py_additional_set_wins != 0 %}
+                <td style="background-color:{{matchup.set_matchup_type.color}}; color:white;">
+                {{matchup.px_set_wins|add:matchup.px_additional_set_wins}}:{{matchup.py_set_wins|add:matchup.py_additional_set_wins}}
+              {% elif matchup.px == matchup.py %}
+                <td style="background-color:#111111; color:white;">
+                X
+              {% else %}
+                <td style="background-color:#333333; color:white;">
+              {% endif %}
+              {% endwith %}
+            </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+</div>

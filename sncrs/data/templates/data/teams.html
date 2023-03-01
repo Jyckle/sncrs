@@ -1,0 +1,23 @@
+<table class="table table-borderless table-dark">
+  <tr>
+  {% load extra_filters %}
+  {% for team in team_list %}
+  <td style="padding-top:1px">
+    <table class="table table-bordered border-dark bg-dark text-light table-hover text-center">
+      <thead>
+        <tr>
+            <th style="background-color:black" scope="col">{{team.name}}</th>
+        </tr>
+        </thead>
+        <tbody>
+          {% for member in team.person_set|member_filter %}
+              <tr>
+                  <td style="background-color:{{team.team_color}}; color:white;">{{member.display_name}}</td>
+              </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+  </td>
+  {% endfor %}
+</tr>
+</table>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h1>Matchup Visuals</h1>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="container">
+    <div class="col">
+      <div class="row" style="margin-bottom:10px">
+        {% include 'data/game_matchups.html' %}
+      </div>
+      <div class="row">
+        {% include 'data/set_matchups.html' %}
+      </div>
+    </div>
+</div>
+{% endblock %}

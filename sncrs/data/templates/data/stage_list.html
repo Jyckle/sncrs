@@ -1,0 +1,28 @@
+<table class="table table-borderless table-dark text-center table-responsive">
+  <tr>
+    <th colspan="2" style="background-color:black"> Stage List </th>
+  </tr>
+  <tr>
+    {% for stage_type in stage_types %}
+    <td>
+      <table class="table table-bordered border-dark bg-dark text-light table-hover text-center align-middle table-responsive">
+        <thead>
+          <tr>
+              <th colspan= "2" scope="col">{{stage_type.name}}s</th>
+          </tr>
+          </thead>
+          <tbody style="background-color:{{stage_type.display_color}};">
+            {% for stage in stage_type.stage_set.all %}
+              <tr>
+                  <td>
+                    {{stage.name}} <br>
+                    <img class= "img-fluid mx-auto" src="{{stage.url}}" alt="{{stage.name}}">
+                  </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+      </table>
+    </td>
+    {% endfor %}
+  </tr>
+</table>

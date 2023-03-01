@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h1> Scoring for {{c_person.display_name}} </h1>
+{% endblock %}
+
+{% block content %}
+{% load extra_filters %}
+{% include 'data/season_selector.html' %}
+<div class="container">
+  <div class="container table-wrapper">
+    <table class="table table-bordered border-light bg-dark text-light text-center align-middle table-responsive table-sticky table-sticky-bordered">
+      <thead>
+        <tr class="sticky-top-row black-bg-row">
+          <th scope="col" style="border-right: 1px solid white"> Legend </th>
+          {% for sn in c_person|get_smashnights:smashnight_set %}
+          <th scope="col" colspan="{{matches|get_match_count:sn}}" style="border-right: 1px solid white"> SmashNight {{sn.date}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row" class="sticky-left black-bg"> Competitor </th>
+          {% for match in matches %}
+          <td style="background-color:#8a8888">
+              {% if match.p1 == c_person %}
+                {{match.p2.display_name}}
+              {% else %}
+                {{match.p1.display_name}}
+              {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="row" class="sticky-left black-bg"> Wins </th>
+          {% for match in matches %}
+            {% if match.p1 == c_person %}
+              <td>{{match.p1_wins}}</td>
+            {% else %}
+              <td>{{match.p2_wins}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="row" class="sticky-left black-bg"> Losses </th>
+          {% for match in matches %}
+            {% if match.p1 == c_person %}
+              <td>{{match.p2_wins}}</td>
+            {% else %}
+              <td>{{match.p1_wins}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="row" class="sticky-left black-bg"> Score Change </th>
+          {% for match in matches %}
+            {% if match.p1 == c_person %}
+              {% if match.p1_score_change > 0 %}
+                <td style="background-color:green">
+              {% elif match.p1_score_change < 0 %}
+                <td style="background-color:red">
+	      {% else %}
+		<td>
+	      {% endif %}
+                  {{match.p1_score_change}}
+                </td>
+            {% else %}
+              {% if match.p2_score_change > 0 %}
+                <td style="background-color:green">
+              {% elif match.p2_score_change < 0 %}
+                <td style="background-color:red">
+              {% else %}
+	        <td>
+              {% endif %}
+              {{match.p2_score_change}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          <th scope="row" class="sticky-left black-bg"> Match Video </th>
+          {% for match in matches %}
+            {% if match.match_url != None %}
+              <td><a href="{{match.match_url}}" target="_blank">Watch</a></td>
+            {% else %}
+              <td>No Video</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </tbody>
+  </div>
+</div>
+
+{% endblock %}

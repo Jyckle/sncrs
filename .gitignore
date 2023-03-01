@@ -1,0 +1,17 @@
+env/
+venv/
+
+sncrs/static/
+sncrs/www/static/
+configuration/env_file.prod
+sncrs/*.sqlite3
+
+backup/*
+!backup/backup.sh
+!backup/backup.conf.sample
+!backup/backup.cron.sample
+
+.idea/
+
+*.pickle
+__pycache__/

@@ -1,0 +1,39 @@
+<table class="table table-bordered border-dark bg-dark text-light text-center align-middle table-responsive">
+  <thead>
+    <tr>
+      <th colspan="4" style="background-color:black" scope="col"> Bracket Medalists </th>
+    <tr>
+  </thead>
+  <tbody>
+  {% for bracket in latest_brackets %}
+    <tr>
+      <td rowspan="3" style="background-color:#727272; width:30%">{{bracket.title}}</td>
+      <td colspan="3" style="background-color:#FFD700; color:black; width:70%">
+        {% if bracket.placement_set.all.0.person != None %}
+          {{bracket.placement_set.all.0.person}}
+        {% else %}
+          No current data
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style="background-color:#C0C0C0; color:black; width:70%">
+        {% if bracket.placement_set.all.1.person != None %}
+          {{bracket.placement_set.all.1.person}}
+        {% else %}
+          No current data
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style="background-color:#CD7F32; color:black; width:70%">
+        {% if bracket.placement_set.all.2.person != None %}
+          {{bracket.placement_set.all.2.person}}
+        {% else %}
+          No current data
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>

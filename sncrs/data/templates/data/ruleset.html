@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h1>Ruleset</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      {% include 'data/stage_list.html' %}
+    </div>
+    <div class="col">
+      <table class="table table-dark table-bordered table-striped">
+        <thead class="text-center">
+          <tr>
+            <th colspan="2" style="background-color:black"> Pre-Match Protocol </th>
+          </tr>
+          <tr>
+            <th scope="col"> Before 1st Game </th>
+            <th scope="col"> Successive Games </th>
+          </tr>
+        </thead>
+        <tbody class="text-left">
+          <tr>
+            <td> Play Rock Paper Scissors </td>
+            <td> Winner of previous game bans 2 from total legal stage list </td>
+          </tr>
+          <tr>
+            <td> Winner bans 1 Starter Stage </td>
+            <td> Loser Selects from the remaining stages </td>
+          </tr>
+          <tr>
+            <td> Loser bans 2 Starter Stages </td>
+            <td> You cannot select the stage you won on last [optional] </td>
+          </tr>
+          <tr>
+            <td> Winner bans a final Starter Stage </td>
+            <td> Winner picks character first </td>
+          </tr>
+          <tr>
+            <td> You play on what remains </td>
+          </tr>
+          <tr>
+            <td> Character selection is double blind </td>
+          </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

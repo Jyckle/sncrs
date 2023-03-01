@@ -1,0 +1,5 @@
+# Backup SNCRS data daily.
+0 12 * * * /path/to/repo/backup/backup.sh >/path_to_repo/backup/backup.log 2>&1
+
+# Purge old local backups for SNCRS.
+@daily find "/path/to/repo/backup/archives" -name 'sncrs-*.tar.*' -mtime +14 -delete

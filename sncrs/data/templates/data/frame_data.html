@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}
+<h1 id="debug">Introduction to Frame Data</h1>
+{% endblock %}
+
+{% block content %}
+{% load extra_filters %}
+{% load static %}
+<div class="container">
+<div class="containerTrans">
+
+    <h3 class="h3Intro">Wait, don't run away!</h3>
+    <p>When you think about frame data, the first thing that likely comes to mind is some sweaty tryhard reciting some move's shield safety at a local, or even just Colton swearing under his breath about Yoshi's frame 3 nair being the bane of his existence. At face value, it can definitely seem intimidating or outright unnecessary to learn, but even without memorizing most of the specifics there is a lot to be gained from understanding the basics. This page serves to provide the basic context necessary to understand what all the numbers and pictures below mean, and why you should care!</p>
+    <br>
+    <h3 class = "h3Intro">Quick vocab review</h3>
+    <p>Part of what makes understanding frame data seem so intimidating is the prevelant use of jargon. However, most of these terms are simple shorthands that are easy to remember once you've been taught. Some simple ones that might help you get started are:<br>
+      <ul>
+        <li>Damage: the amount of % that the attack will give the opponent</li>
+        <li>Knockback: the strength with which an attack hurls the opponent</li>
+        <li>Frame: all movement is broken into discrete pieces, and there are 60 frames in a second</li>
+        <li>Hitbox: this is the area in which an attack does damage</li>
+        <li>Hurtbox: this is the area on a character where you will take damage if a hitbox overlaps with it</li>
+        <li>Windbox: some attacks push you without actually registering as a hit, and the area where this occurs is the Windbox!</li>
+        <li>Active: refers to whether or not an attack has a hitbox out (active=yes, inactive=no)</li>
+        <li>Hit stun: how long the victim of a hit is unable to act. This is very dependent on how much damage the victim has</li>
+        <li>Shield stun: the amount of time the defender is stunned when an attack hits their shield</li>
+        <li>Shield lag: the delay both players experience when a move hits a shield. Since it's the same for both parties, it doesn't affect shield safety.</li>
+        <li>Jump squat: All characters spend 3 frames preparing to jump before they actually leave the ground</li>
+        <li>Shield drop: Letting go of shield has its own animation, which is the same 11 frames for all characters. Shield drop can be skipped by performing the following from within shield:
+          <ul>
+            <li>Jump</li>
+            <li>Up-Smash</li>
+            <li>Up-B</li>
+            <li>Grab, but there is a special 4-frame penalty if it is performed after an attack has hit your shield</li>
+          </ul>
+        </li>
+        <li>Invincibility: Attacks can register as hits on your character, but they will deal no damage or knockback</li>
+        <li>Intangibility: Attacks will pass right through your character, still dealing no damage or knockback</li>
+        <li>Startup: How much time it takes after inputting an attack before it is active</li>
+        <li>Endlag: How long you are stuck in a move's animation (and unable to act) after it is no longer active</li>
+        <li>Landing lag: How long you are stunned if landing in the middle of an aerial attack</li>
+        <li>Autocancel: A situation where landing during certain frames of an aerial results in 0 landing lag</li>
+      </ul>
+    </p>
+    <br>
+    <h3 class = "h3Intro">What you'll see</h3>
+    <p>UltimateFrameData.com is the brain child of MetalMusicMan, a smasher from right here in STL! The site pulls together the animations for each character's moveset with highlighting to show how it works under the hood and values for when certain things occur. The images and numbers provided might not make sense at first, but at their core they really aren't that complicated. UltimateFrameData.com even has a help page to help you understand things, which we've taken and built onto a little more below.</p>
+    <b class="frameHeading">Animation colors (hitbox)</b>
+    <ul>
+      <li>Red = strong</li>
+      <li>Pink = weak</li>
+      <li>Blue = wind</li>
+      <li>Purple = Grab</li>
+    </ul>
+    <img class="centerImg" alt="PalutenaDSmash.gif" src="https://ultimateframedata.com/hitboxes/palutena/PalutenaDSmash.gif">
+    <br>
+    <b class="frameHeading">Animation colors (hurtbox)</b>
+    <ul>
+      <li>Blue = intangible</li>
+      <li>Green = invincible</li>
+      <li>Black = armor</li>
+    </ul>
+    <img class="centerImg" alt="BowserUSmash.gif" src="https://ultimateframedata.com/hitboxes/bowser/BowserUSmash.gif">
+    <br>
+    <b class="frameHeading">Frame advantage on shield</b><br>
+    <p>
+    This is often where people get freaked out, but the scary jargon is all just describing some simple math meant to capture a very key aspect of the game: If I use this attack and it gets shielded, how much trouble am I in? In reality, this is a function of how much endlag I am stuck in after the attack, how much shield stun it inflicted on them, what their quickest option out of shield is, and how far from them I managed to stay. Instead of doing the math for every character at every distance, however, we just subtract the <i>shield stun</i> from the <i>endlag</i> and see what that leaves us with. As such, if a move is really quick and lets the attacker out of stun 2 frames before the defender, it is "+2 on shield." Meanwhile, if we hit a shield with a terribly laggy move that doesn't inflict much shield stun, it is like to be very negative on shield. See, that's not so scary!
+    <img src="{% static 'data/FrameData/shieldsafety.PNG' %}" alt="shield safety example" class="centerImg">
+    </p>
+    <h3 class = "h3Intro">What you'll get</h3>
+    <p>OK, so that might seem like a lot already, as the site is an amazing compilation of information, but unless you are theory crafting new combos you don't need to memorize most of the exact values. Here are some of the main things to look for as you dip your toes in:<br>
+    <b class="frameHeading">How much startup is there?</b><br>
+    Attacks with short startup can be helpful for getting out of combos or shield (especially if they are one of the special cases that ignore shield drop). Meanwhile trying to spam moves with slow startup while being juggled makes it all the more likely that you will get hit again!<br>
+    <b class="frameHeading">How much endlag is there?</b><br>
+    Moves with very little endlag are less of a commitment and generally safer to throw out liberally. Meanwhile moves with more endlag are risky as you are left helpless if they miss.<br>
+    <b class="frameHeading">What are my out of shield (OOS) options?</b><br>
+    Attacking and defending is at the core of this game, and no matter how good your movement is you will eventually find yourself having to shield an attack. Knowing what to do next is invaluable, and varies greatly from character to character. Since Up-smash and Up-B skip shield drop, those are often good places to start. Next best is generally aerials, since you can trade the 11 frames of shield drop for the 3 frames of jump squat you'll have to add to your move's startup! While we used to have to go find these ourselves, UltimateFrameData now actually lists every character's best OOS option on the Stats page, so make sure to stop in there too!<br>
+    <b class="frameHeading">How safe is this attack on shield?</b><br>
+    Again, this isn't about remembering exact values necessarily. This is about having enough understanding of your options and your opponent's options to pick the right moves for a situation. You don't need to know that Ganon's down b "Wizard foot" is -29 on shield and Fox can choose between a frame 7 Nair (4 frames startup + 3 frames of jumpsquat) and a frame 8 up smash, it's enough just to remember that you don't want to use that move on his shield!
+    <br>
+    </p>
+    <h3 class = "h3Intro">Diving deeper</h3>
+    <p>All of this has been a watered down intro to UltimateFrameData.com, and even as comprehensive as it is the site can't really capture the nuance underlying every interaction at every possible timing/spacing in the game. It is meant to be a jumping off point, and a great one at that. In addition to all the attack data, there is a lot of character information to be found in the "Stats" area besides just the aforementioned OOS options, so give it a look! At the end of the day, the takeaway is that this game is just a bunch of math rules that can be learned, internalized, and exploited.<br>
+    <img class="centerImg" src="https://i.makeagif.com/media/1-26-2016/MgwmTf.gif">
+    <br>
+    If you've made it this far, you're definitely ready, so click on the link below and get schooled on some frame data!</p>
+    <form action="https://ultimateframedata.com/" target="_blank">
+      <button type="submit" value="UltimateFrameData.com" class="frameLink"><b>ULTIMATE FRAME DATA</b></button>
+    </form>
+    <br>
+
+</div>
+</div>
+
+
+{% endblock %}
