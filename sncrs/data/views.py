@@ -2,6 +2,12 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Func, F
 from django.db.models.functions import Lower
 
+from data.models import Match
+from data.serializers import MatchSerializer
+from data.filters import MatchFilter
+from rest_framework import generics
+
+
 from .models import Person, Team, StageType, Match, SmashNight
 
 
@@ -135,3 +141,12 @@ def about_view(request, *args, **kwargs):
 
 def calendar_view(request, *args, **kwargs):
     return render(request, "data/calendar.html", {})
+
+
+class MatchList(generics.ListAPIView):
+    queryset = Match.objects.all()
+    serializer_class = MatchSerializer
+    filterset_class = MatchFilter
+    # filterset_fields = {
+    #     'p1', 'p2', 'sn', 'p1__chat_tag', 'p2__chat_tag'
+    # }
