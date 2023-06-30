@@ -2,13 +2,10 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Func, F
 from django.db.models.functions import Lower
 
-from data.models import Match
-from data.serializers import MatchSerializer
-from data.filters import MatchFilter
+from data.models import Match, PersonSnapshot, Person, Team, StageType, SmashNight
+from data.serializers import MatchSerializer, SnapshotSerializer
+from data.filters import MatchFilter, SnapshotFilter
 from rest_framework import generics
-
-
-from .models import Person, Team, StageType, Match, SmashNight
 
 
 def initialize_sn_set(request):
@@ -147,6 +144,8 @@ class MatchList(generics.ListAPIView):
     queryset = Match.objects.all()
     serializer_class = MatchSerializer
     filterset_class = MatchFilter
-    # filterset_fields = {
-    #     'p1', 'p2', 'sn', 'p1__chat_tag', 'p2__chat_tag'
-    # }
+
+class SnapshotList(generics.ListAPIView):
+    queryset = PersonSnapshot.objects.all()
+    serializer_class = SnapshotSerializer
+    filterset_class = SnapshotFilter
