@@ -124,5 +124,5 @@ def reset_scores(max_val=200.0, min_val=60.0, interval=10.0):
     """Resets scores starting with the highest score as max_val,
     and decrementing by interval for each rank"""
     for person in Person.objects.filter(tag=Person.MEMBER):
-        person.score = max(max_val - (person.rank - 1) * interval, min_val)
+        person.score = max(max_val - ((person.rank or 100) - 1) * interval, min_val)
         person.save()

@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_filters',
     'data',
 ]
 
@@ -117,6 +119,10 @@ USE_L10N = True
 USE_TZ = True
 
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -143,7 +149,7 @@ SECURE_HSTS_PRELOAD = True
 SECURE_SSL_REDIRECT = True
 RUN_EFFICIENCY_TESTS = False
 
-if os.environ.get('DJANGO_DEVELOPMENT', 'false') == 'true':
+if DEBUG:
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
     SECURE_HSTS_SECONDS = 0

@@ -14,5 +14,5 @@ urlpatterns = [
     path('about/', about_view, name='about'),
     path('venues/', venues_view, name='venues'),
     path('frame_data/', frame_data_view, name='frame_data'),
-    path('calendar/', calendar_view, name='calendar')
+    path('calendar/', calendar_view, name='calendar'),
 ]

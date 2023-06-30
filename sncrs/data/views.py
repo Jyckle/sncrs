@@ -2,7 +2,10 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Func, F
 from django.db.models.functions import Lower
 
-from .models import Person, Team, StageType, Match, SmashNight
+from data.models import Match, PersonSnapshot, Person, Team, StageType, SmashNight
+from data.serializers import MatchSerializer, SnapshotSerializer
+from data.filters import MatchFilter, SnapshotFilter
+from rest_framework import generics
 
 
 def initialize_sn_set(request):
@@ -135,3 +138,14 @@ def about_view(request, *args, **kwargs):
 
 def calendar_view(request, *args, **kwargs):
     return render(request, "data/calendar.html", {})
+
+
+class MatchList(generics.ListAPIView):
+    queryset = Match.objects.all()
+    serializer_class = MatchSerializer
+    filterset_class = MatchFilter
+
+class SnapshotList(generics.ListAPIView):
+    queryset = PersonSnapshot.objects.all()
+    serializer_class = SnapshotSerializer
+    filterset_class = SnapshotFilter

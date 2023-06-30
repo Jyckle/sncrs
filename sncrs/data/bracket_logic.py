@@ -6,7 +6,7 @@ from .utility_functions import get_challonge_bracket_data, get_sncrs_person
 
 # get the final rank of a participant
 def get_final_bracket_ranks(c_bracket):
-    final_match = sorted(c_bracket.match_set.all(), key=lambda current_match: -current_match.round)[0]
+    final_match = sorted(c_bracket.match_set.all(), key=lambda current_match: (-current_match.round, -current_match.challonge_id))[0]
     matches = sorted(c_bracket.match_set.all(), key=lambda current_match: current_match.round)
     rankings = {}
     round_winners = []
