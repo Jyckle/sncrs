@@ -11,6 +11,7 @@
   <table class="table table-dark table-bordered align-middle text-center table-sticky table-custom-striped">
     <thead>
       <tr class="sticky-top-row black-bg-row">
+        <th scope="col">Team</th>
         <th scope="col">Name</th>
         <th scope="col">Place</th>
         <th scope="col">Score</th>
@@ -23,7 +24,16 @@
       <tbody>
         {% for person in person_list %}
           <tr>
-            <th scope="row" class="sticky-left">{{person.display_name}}</th>
+            {% if person.team.tag == "DH" %}
+            <td scope="row" class="sticky-left"><img style= "max-width:75px; max-height:75px" src="{% static 'data/logo_dh.png' %}""></td>
+            {% elif person.team.tag == "GG" %}
+            <td scope="row" class="sticky-left"><img style= "max-width:75px; max-height:75px" src="{% static 'data/logo_gg.png' %}""></td>
+            {% elif person.team.tag == "GST" %}
+            <td scope="row" class="sticky-left"><img style= "max-width:75px; max-height:75px" src="{% static 'data/logo_5.png' %}""></td>
+            {% elif person.team.tag == "TSM" %}
+            <td scope="row" class="sticky-left"><img style= "max-width:75px; max-height:75px" src="{% static 'data/logo_tsm.png' %}""></td>
+            {% endif %}
+            <th>{{person.display_name}}</th>
             <td>{{person.rank}}</td>
             <td>{{person.score}}</td>
 
