@@ -27,7 +27,8 @@ You will want a virtual environment to keep this all in so that things don't get
 To create the virtual environment. This only needs to be done once.
 Then, whenever you want to activate it, make sure you are in the SNCRS directory, and run:
 
-`source env/bin/activate`
+`source env/bin/activate` for POSIX
+`source env/Scripts/activate` for git bash
 
 Which should then make a (env) appear before your terminal prompt.
 
