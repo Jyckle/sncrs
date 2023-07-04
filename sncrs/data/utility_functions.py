@@ -2,7 +2,7 @@
 
 import challonge
 from .models import Person, Matchup
-import pandas
+# import pandas
 import os
 
 
@@ -108,16 +108,16 @@ def add_additional_matchup(c_p1, c_p2, px_wins, py_wins):
 
 
 # function to add all additional matches from csv
-def add_all_additional_matchups(path_to_file):
-    df = pandas.read_csv(path_to_file, index_col=0)
-    items_to_add = []
-    for i, j in df.iterrows():
-        for k, l in j.iteritems():
-            if not pandas.isnull(l):
-                vals = str(l).replace(" ", "").split(":")
-                items_to_add.append([i, k, int(vals[0]), int(vals[1])])
-    for item in items_to_add:
-        add_additional_matchup(item[0], item[1], item[2], item[3])
+# def add_all_additional_matchups(path_to_file):
+#     df = pandas.read_csv(path_to_file, index_col=0)
+#     items_to_add = []
+#     for i, j in df.iterrows():
+#         for k, l in j.iteritems():
+#             if not pandas.isnull(l):
+#                 vals = str(l).replace(" ", "").split(":")
+#                 items_to_add.append([i, k, int(vals[0]), int(vals[1])])
+#     for item in items_to_add:
+#         add_additional_matchup(item[0], item[1], item[2], item[3])
 
 
 def reset_scores(max_val=200.0, min_val=60.0, interval=10.0):

@@ -1,0 +1,9 @@
+Django
+djangorestframework
+django-filter
+gunicorn
+google-api-python-client
+google-auth
+pychallonge>1.2
+psycopg2-binary
+requests

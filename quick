@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+dev_type=$1
+container_command=$2
+extra_args=${@:3}
+
+compose_args=()
+if [ $dev_type == "dev" ]; then
+    compose_args=("--env-file" "config/.env.dev")
+    env_file="config/.env.dev"
+elif [ $dev_type = "prod" ]; then
+    compose_args=("--env-file" "config/.env.prod" "--file" "compose.prod.yaml")
+    env_file="config/.env.prod"
+fi
+if [ $container_command == "up" ]; then
+    extra_args=("-d" "${extra_args[@]}")
+fi
+
+docker compose ${compose_args[@]} $container_command ${extra_args[@]}
+if [ $container_command == "up" ]; then
+    . $env_file && echo "Application available at http://localhost:${ACCESS_PORT}"
+fi

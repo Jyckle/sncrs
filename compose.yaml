@@ -1,0 +1,24 @@
+name: sncrs_dev
+
+services:
+  web:
+    env_file:
+      - config/.env.dev
+    build:
+      context: sncrs
+      dockerfile: Containerfile
+    ports:
+      - "${ACCESS_PORT}:8020"
+    volumes:
+      - ./sncrs:/sncrs
+    depends_on:
+      - db
+  db:
+    image: postgres
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data/
+    env_file:
+      - config/.env.dev
+
+volumes:
+  postgres_dev_data:

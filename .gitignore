@@ -3,7 +3,7 @@ venv/
 
 sncrs/static/
 sncrs/www/static/
-configuration/env_file.prod
+config/.env.prod
 sncrs/*.sqlite3
 
 backup/*
