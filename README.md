@@ -30,7 +30,9 @@ If there is no version installed, follow the instructions to install it
 
 This one is super easy but might take a minute. Just run:
 
-`./quick dev up`
+```bash
+./qs run dev
+```
 
 Congratulations! You now have everything you need installed!
 
@@ -39,5 +41,34 @@ You should be able to access the instance at the url provided and the admin inte
 To run the main code that updates all scores and everything, select the SmashNight in question in the admin panel, and then from the Action bar, select "Get all data associated with the selected SmashNights and update scores" and then hit go. Take note, this will update the overall status for each person, so only run this once everything is in order!
 
 Then, the magic happens! Voila!
+
+## Other commands
+
+### Production deployment
+
+```bash
+./qs run prod
+```
+
+### Stop Dev or Prod
+
+```bash
+./qs stop dev
+./qs stop prod
+```
+
+### Set up backups
+
+Note: This will only back up the production postgres container
+
+```bash
+./qs backup install
+```
+
+### Back up immediately
+
+```bash
+./qs backup now
+```
 
 ## Long Live SmashNights!
