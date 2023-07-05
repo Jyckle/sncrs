@@ -12,9 +12,6 @@ import sys
 
 from django.core.wsgi import get_wsgi_application
 
-sys.path.append(os.environ.get("SNCRS_PRODUCTION_REPO_PATH"))
-sys.path.append(os.environ.get("SNCRS_PRODUCTION_VENV_SITE_PACKAGES_PATH"))
-
 os.environ['DJANGO_SETTINGS_MODULE'] = 'sncrs.settings'
 
 application = get_wsgi_application()

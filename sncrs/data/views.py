@@ -26,15 +26,22 @@ def initialize_sn_set(request):
 def home_view(request, *args, **kwargs):
     person_queryset = Person.objects.filter(tag=Person.MEMBER).order_by("-score")
     team_queryset = Team.objects.exclude(name="GUEST")
-    latest_brackets = SmashNight.objects.latest('date').bracket_set.order_by('rank')
-    snapshot_set = sorted(
-        SmashNight.objects.latest('date').personsnapshot_set.all(),
-        key=lambda k: -1*(k.end_score - k.start_score)
-    )
-    score_sorted_snapshots = sorted(
-        SmashNight.objects.latest('date').personsnapshot_set.all(),
-        key=lambda k: -1*k.end_score
-    )
+    try:
+        latest_sn = SmashNight.objects.latest('date')
+        latest_brackets = latest_sn.bracket_set.order_by('rank')
+        snapshot_set = sorted(
+            latest_sn.personsnapshot_set.all(),
+            key=lambda k: -1*(k.end_score - k.start_score)
+        )
+        score_sorted_snapshots = sorted(
+            latest_sn.personsnapshot_set.all(),
+            key=lambda k: -1*k.end_score
+        )
+    except SmashNight.DoesNotExist:
+        latest_brackets = []
+        snapshot_set = []
+        score_sorted_snapshots = []
+
     context = {
         "person_list": person_queryset,
         "team_list": team_queryset,

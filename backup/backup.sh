@@ -1,61 +1,19 @@
 #!/bin/bash
 
 set -ex
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# Use the value of the corresponding environment variable, or the
-# default if none exists.
-: ${SNCRS_ROOT:="$(realpath "${0%/*}"/..)"}
-: ${SQLITE3:="/usr/bin/sqlite3"}
-: ${RCLONE:="/usr/bin/rclone"}
+WORK_DIR=$(mktemp -d)
+trap "rm -rf $WORK_DIR" EXIT
 
-DATA_DIR="sncrs"
-BACKUP_ROOT="${SNCRS_ROOT}/backup"
-BACKUP_DIR_NAME="sncrs-$(date '+%Y%m%d-%H%M')"
-BACKUP_DIR_PATH="${BACKUP_ROOT}/${BACKUP_DIR_NAME}"
-BACKUP_FILE_DIR="archives"
-BACKUP_FILE_NAME="${BACKUP_DIR_NAME}.tar.xz"
-BACKUP_FILE_PATH="${BACKUP_ROOT}/${BACKUP_FILE_DIR}/${BACKUP_FILE_NAME}"
-DB_FILE="db.sqlite3"
-
-source "${BACKUP_ROOT}"/backup.conf
-
-cd "${SNCRS_ROOT}"
-mkdir -p "${BACKUP_DIR_PATH}"
-
-# Back up the database using the Online Backup API (https://www.sqlite.org/backup.html)
-# as implemented in the SQLite CLI. However, if a call to sqlite3_backup_step() returns
-# one of the transient errors SQLITE_BUSY or SQLITE_LOCKED, the CLI doesn't retry the
-# backup step; instead, it simply stops the backup and returns an error. This is unlikely,
-# but to minimize the possibility of a failed backup, implement a retry mechanism here.
-max_tries=10
-tries=0
-until ${SQLITE3} "file:${DATA_DIR}/${DB_FILE}?mode=ro" ".backup ${BACKUP_DIR_PATH}/${DB_FILE}"; do
-    if (( ++tries >= max_tries )); then
-        echo "Aborting after ${max_tries} failed backup attempts..."
-        exit 1
-    fi
-    echo "Backup failed. Retry #${tries}..."
-    rm -f "${BACKUP_DIR_PATH}/${DB_FILE}"
-    sleep 1
-done
-
-tar -cJf "${BACKUP_FILE_PATH}" -C "${BACKUP_ROOT}" "${BACKUP_DIR_NAME}"
-rm -rf "${BACKUP_DIR_PATH}"
-md5sum "${BACKUP_FILE_PATH}"
-sha1sum "${BACKUP_FILE_PATH}"
-
-if [[ -n ${GPG_PASSPHRASE} ]]; then
-    # https://gnupg.org/documentation/manuals/gnupg/GPG-Esoteric-Options.html
-    # Note: Add `--pinentry-mode loopback` if using GnuPG 2.1.
-    printf '%s' "${GPG_PASSPHRASE}" |
-    gpg -c --cipher-algo "${GPG_CIPHER_ALGO}" --batch --passphrase-fd 0 "${BACKUP_FILE_PATH}"
-    BACKUP_FILE_NAME+=".gpg"
-    BACKUP_FILE_PATH+=".gpg"
-    md5sum "${BACKUP_FILE_PATH}"
-    sha1sum "${BACKUP_FILE_PATH}"
+. $SCRIPT_DIR/.env
+sncrs_postgres_container=$(docker container ls | grep 'sncrs_prod[^ ]*db' | head -n 1 | cut -f1,1 -d" ")
+if [ -z $sncrs_postgres_container ]; then
+    echo "Error: The sncrs postgres container is not available, can't backup"
+    exit 1
 fi
-
-for dest in "${RCLONE_DESTS[@]}"; do
-    ${RCLONE} -vv --no-check-dest copy "${BACKUP_FILE_PATH}" "${dest}"
+BACKUP_FILE_PATH=${WORK_DIR}/sncrs-$(date '+%Y%m%d-%H%M').gz
+docker exec ${sncrs_postgres_container} pg_dump -c -U ${POSTGRES_USER} -d ${POSTGRES_DB} | gzip > $BACKUP_FILE_PATH
+for dest in "$RCLONE_DESTS"; do
+    rclone -vv --no-check-dest copy "${BACKUP_FILE_PATH}" "${dest}"
 done
-

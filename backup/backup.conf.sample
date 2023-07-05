@@ -1,9 +1,0 @@
-#!sh
-
-GPG_CIPHER_ALGO=AES128
-GPG_PASSPHRASE='yoursupersecurepasswordhere'
-
-
-RCLONE_DESTS=(
-    some_rclone_dest_here
-)

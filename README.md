@@ -8,7 +8,7 @@ This repo is to facilitate the glory that is SNCRS, via the challonge api and ou
 
 To be able to use this script, you will likely want a linux or mac instance, but I'm sure there is some way to do it on Windows also. The guide following is for linux.
 
-#### Step 1: Clone from GitHub
+### Step 1: Clone from GitHub
 
 Hey! You're already here, so that's great! To clone this repo, just open a terminal and navigate to whatever directory you want this in. Then copy and paste the command below:
 
@@ -18,39 +18,57 @@ Then you should have a directory called sncrs! You can then run:
 
 `cd sncrs`
 
-#### Step 2: Create and Activate a Virtual Environment
+### Step 2: Make sure docker is installed
 
-You will want a virtual environment to keep this all in so that things don't get messy on your system. You can run:
+Try
 
-`python3 -m venv env`
+`docker --version`
 
-To create the virtual environment. This only needs to be done once.
-Then, whenever you want to activate it, make sure you are in the SNCRS directory, and run:
+If there is no version installed, follow the instructions to install it
 
-`source env/bin/activate` for POSIX
-`source env/Scripts/activate` for git bash
-
-Which should then make a (env) appear before your terminal prompt.
-
-#### Step 3: Run the Makefile to get all the Dependencies
+### Step 3: Run quick to start the dev container
 
 This one is super easy but might take a minute. Just run:
 
-`make`
+```bash
+./qs run dev
+```
 
 Congratulations! You now have everything you need installed!
 
-## Running a local instance of Django
-
-To use this instance locally, you first need to run the following commands:
-
-`cd sncrs`
-`python manage.py runserver`
-
-Then you should be able to access the instance at the url provided and the admin interface at the url with /admin at the end
+You should be able to access the instance at the url provided and the admin interface at the url with /admin at the end
 
 To run the main code that updates all scores and everything, select the SmashNight in question in the admin panel, and then from the Action bar, select "Get all data associated with the selected SmashNights and update scores" and then hit go. Take note, this will update the overall status for each person, so only run this once everything is in order!
 
 Then, the magic happens! Voila!
+
+## Other commands
+
+### Production deployment
+
+```bash
+./qs run prod
+```
+
+### Stop Dev or Prod
+
+```bash
+./qs stop dev
+./qs stop prod
+```
+
+### Set up backups
+
+Note: This will only back up the production postgres container
+
+```bash
+./qs backup install
+```
+
+### Back up immediately
+
+```bash
+./qs backup now
+```
 
 ## Long Live SmashNights!

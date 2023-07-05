@@ -21,13 +21,11 @@ DEBUG = False
 if os.environ.get('DJANGO_DEVELOPMENT', 'false') == 'true':
     DEBUG = True
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-*hqtf=+_9i^&3z9l2fw2njkjtc@nu9shw(9o!3^x9cy1t@)73y')
 
-ALLOWED_HOSTS = [os.environ.get('SNCRS_URL'), '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', "").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', "").split(",")
 
 
 # Application definition
@@ -80,8 +78,12 @@ WSGI_APPLICATION = 'sncrs.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("POSTGRES_DB"),
+        'USER': os.environ.get("POSTGRES_USER"),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
+        'HOST': os.environ.get("DB_HOSTNAME"),
+        'PORT': int(os.environ.get("DB_PORT")),
     }
 }
 
@@ -127,33 +129,15 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-STATIC_ROOT = BASE_DIR / "www/static"
+STATIC_ROOT = BASE_DIR / "static"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
-# These are the production settings.
-# Set DJANGO_DEVELOPMENT to true to overwrite these values
-# SECURITY WARNING: don't run with debug turned on in production!
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 60
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-SECURE_SSL_REDIRECT = True
-RUN_EFFICIENCY_TESTS = False
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-if DEBUG:
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
-    SECURE_HSTS_SECONDS = 0
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-    SECURE_HSTS_PRELOAD = False
-    SECURE_SSL_REDIRECT = False
-    RUN_EFFICIENCY_TESTS = True
+
+CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'false') == 'true'
+SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'false') == 'true'
+RUN_EFFICIENCY_TESTS = os.environ.get('RUN_EFFICIENCY_TESTS', 'false') == 'true'
