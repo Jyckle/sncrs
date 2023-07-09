@@ -1,18 +1,23 @@
 from django.db import models
 from django.db.models.functions import Lower
 
+import re
+
 
 # Create your models here.
 class Character(models.Model):
     name = models.CharField(max_length=100)
     image_url = models.URLField(max_length=200, null=True, blank=True)
     character_id = models.IntegerField(null=True, blank=True)
+    @property
+    def static_image_name(self):
+        return "data/characters/" + re.sub(r'[\W]+', '', re.sub('[\W ]+', '_', self.name.lower())) + ".webp"
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ["character_id", "name"]
+        ordering = ["name", "character_id"]
 
 
 class Team(models.Model):
