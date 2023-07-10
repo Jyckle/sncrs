@@ -202,7 +202,7 @@ class StageType(models.Model):
 
 class Stage(models.Model):
     name = models.CharField(max_length=100)
-    url = models.URLField(max_length=200)
+    image = models.ImageField(upload_to='stages', null=True, blank=True)
     type = models.ForeignKey(StageType, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):

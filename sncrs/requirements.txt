@@ -7,3 +7,4 @@ google-auth
 pychallonge>1.2
 psycopg2-binary
 requests
+Pillow
