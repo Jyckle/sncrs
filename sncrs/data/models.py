@@ -264,3 +264,17 @@ class Matchup(models.Model):
 
     class Meta:
         ordering = ["py__display_name"]
+
+
+class Venue(models.Model):
+    name = models.CharField(max_length=255)
+    bio = models.TextField()
+
+    def __str__(self):
+        return str(self.name)
+
+class VenueImage(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    image = models.ImageField(upload_to=f'venues')
+    venue = models.ForeignKey(Venue, related_name='images', on_delete=models.DO_NOTHING)
+
