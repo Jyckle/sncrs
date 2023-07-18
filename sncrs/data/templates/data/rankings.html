@@ -16,7 +16,7 @@
           {%for snapshot in score_sorted_snapshots %}
             <tr height="50px">
               {% if snapshot.end_rank|subtract:snapshot.start_rank < 0 %}
-                <td><img style="max-width:30px" src="https://www.pngkit.com/png/full/11-111195_free-icons-png-green-arrow-icon-png.png" class="img-fluid"></td>
+                <td><img style="max-width:25px" src="https://www.pngkit.com/png/full/11-111195_free-icons-png-green-arrow-icon-png.png" class="img-fluid"></td>
               {% elif snapshot.end_rank|subtract:snapshot.start_rank > 0 %}
                 <td><img style="max-width:30px" src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Descenso.png" class="img-fluid"></td>
               {% else %}
@@ -36,10 +36,12 @@
                 <td>--</td>
               {% endif %}
               <td>{{snapshot.person.display_name}}
-                  {% if snapshot.person.get_status_display == 'Elite' %}
-                    <img style= "max-width:15px; max-height:15px" src="{% static 'data/elite_icon.png' %}">
-                  {% elif snapshot.person.get_status_display == 'Challenger' %}
-                    <img style= "max-width:15px; max-height:15px" src="{% static 'data/challenger_icon.png' %}">
+                  {% if snapshot.person.team.tag == "GG" %}
+                    <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_gg.png' %}">
+                  {% elif snapshot.person.team.tag == "TSM" %}
+                    <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_tsm.png' %}">
+                  {% elif snapshot.person.team.tag == "DH" %}
+                    <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_dh.png' %}">
                   {% endif %}
               </td>
             </tr>
@@ -52,10 +54,12 @@
               <td>{{person.score}}</td>
               <td>--</td>
               <td>{{person.display_name}}
-                {% if person.get_status_display == 'Elite' %}
-                    <img style= "max-width:15px; max-height:15px" src="{% static 'data/elite_icon.png' %}">
-                {% elif person.get_status_display == 'Challenger' %}
-                    <img style= "max-width:15px; max-height:15px" src="{% static 'data/challenger_icon.png' %}">
+                {% if person.team.tag == "GG" %}
+                  <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_gg.png' %}">
+                {% elif person.team.tag == "TSM" %}
+                  <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_tsm.png' %}">
+                {% elif person.team.tag == "DH" %}
+                  <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_dh.png' %}">
                 {% endif %}
 	      </td>
             </tr>
