@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Func, F
 from django.db.models.functions import Lower
 
-from data.models import Match, PersonSnapshot, Person, Team, StageType, SmashNight
+from data.models import Match, PersonSnapshot, Person, Team, StageType, SmashNight, Venue
 from data.serializers import MatchSerializer, SnapshotSerializer
 from data.filters import MatchFilter, SnapshotFilter
 from rest_framework import generics
@@ -132,7 +132,11 @@ def ruleset_view(request, *args, **kwargs):
 
 
 def venues_view(request, *args, **kwargs):
-    return render(request, "data/venues.html", {})
+    venues = Venue.objects.all()
+    context = {
+        "venues": venues
+    }
+    return render(request, "data/venues.html", context)
 
 
 def frame_data_view(request, *args, **kwargs):

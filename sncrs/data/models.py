@@ -1,18 +1,23 @@
 from django.db import models
 from django.db.models.functions import Lower
 
+import re
+
 
 # Create your models here.
 class Character(models.Model):
     name = models.CharField(max_length=100)
     image_url = models.URLField(max_length=200, null=True, blank=True)
     character_id = models.IntegerField(null=True, blank=True)
+    @property
+    def static_image_name(self):
+        return "data/characters/" + re.sub(r'[\W]+', '', re.sub('[\W ]+', '_', self.name.lower())) + ".webp"
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ["character_id", "name"]
+        ordering = ["name", "character_id"]
 
 
 class Team(models.Model):
@@ -197,7 +202,7 @@ class StageType(models.Model):
 
 class Stage(models.Model):
     name = models.CharField(max_length=100)
-    url = models.URLField(max_length=200)
+    image = models.ImageField(upload_to='stages', null=True, blank=True)
     type = models.ForeignKey(StageType, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
@@ -259,3 +264,17 @@ class Matchup(models.Model):
 
     class Meta:
         ordering = ["py__display_name"]
+
+
+class Venue(models.Model):
+    name = models.CharField(max_length=255)
+    bio = models.TextField()
+
+    def __str__(self):
+        return str(self.name)
+
+class VenueImage(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    image = models.ImageField(upload_to=f'venues')
+    venue = models.ForeignKey(Venue, related_name='images', on_delete=models.DO_NOTHING)
+

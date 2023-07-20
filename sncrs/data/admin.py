@@ -101,6 +101,14 @@ class StageTypeAdmin(admin.ModelAdmin):
 class MatchupTypeAdmin(admin.ModelAdmin):
     form = MatchupTypeForm
 
+class VenueImageAdmin(admin.StackedInline):
+    model = VenueImage
+
+class VenueAdmin(admin.ModelAdmin):
+    inlines = [VenueImageAdmin]
+    class Meta:
+        model = Venue
+
 
 admin.site.register(Character)
 admin.site.register(Team, TeamAdmin)
@@ -117,3 +125,5 @@ admin.site.register(Stage)
 admin.site.register(MatchupType, MatchupTypeAdmin)
 admin.site.register(PersonSnapshot)
 admin.site.register(Matchup)
+admin.site.register(VenueImage)
+admin.site.register(Venue, VenueAdmin)

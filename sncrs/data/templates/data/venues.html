@@ -19,28 +19,21 @@
       </thead>
       <tbody>
          <!--  for venue in venue_set  -->
+        {% for venue in venues %}
         <tr class="venueRow">
-          <td scope="row" class="venueCell" onmouseenter="showSlides()" onmouseleave="resetSlides()">
-            <div class="mySlides"><img src="{% static 'data/HDP/HDP2.jpg' %}" alt="pic" class="venuePic"></div>
-            <div class="mySlides"><img src="{% static 'data/HDP/HDP5.jpg' %}" alt="pic" class="venuePic"></div>
-            <div class="mySlides"><img src="{% static 'data/HDP/HDP6.jpg' %}" alt="pic" class="venuePic"></div>
-            <div class="mySlides"><img src="{% static 'data/HDP/HDP7.jpg' %}" alt="pic" class="venuePic"></div>
-            <div class="mySlides"><img src="{% static 'data/HDP/HDP1.jpg' %}" alt="pic" class="venuePic"></div>
+          <td class="venueCell" onmouseenter="showSlides(this)" onmouseleave="resetSlides(this)">
+            {% for image in venue.images.all %}
+              {% if forloop.counter == 1 %}
+                <div class="mySlides"><img src="{{image.image.url}}" alt="pic" class="venuePic"></div>
+              {% else %}
+                <div class="mySlides" style="display:none"><img src="{{image.image.url}}" alt="pic" class="venuePic"></div>
+              {% endif %}
+            {% endfor %}
           </td>
-          <td>Historic Dylan's Place</td>
-          <td class="venueBio">Grungy dungeon where it all began...</td>
+          <td>{{venue.name}}</td>
+          <td class="venueBio">{{venue.bio}}</td>
         </tr>
-        <tr class="venueRow">
-          <td scope="row" class="venueCell" onmouseenter="showSlides2()" onmouseleave="resetSlides2()">
-            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH1.jpg' %}" alt="pic" class="venuePic"></div>
-            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH2.jpg' %}" alt="pic" class="venuePic"></div>
-            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH3.jpg' %}" alt="pic" class="venuePic"></div>
-            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH4.jpg' %}" alt="pic" class="venuePic"></div>
-            <div class="my2Slides2" ><img src="{% static 'data/PSH/PSH5.jpg' %}" alt="pic" class="venuePic"></div>
-          </td>
-          <td>Pasquesi Smash House</td>
-          <td class="venueBio">A comfy lounge equipped with space and fun lighting</td>
-        </tr>
+        {% endfor %}
         <!--  endfor  -->
       </tbody>
     </table>
@@ -48,73 +41,39 @@
 </div>
 
 <script>
-var slideIndex = 1;
+var slideIndex = 0;
 var showRunning;
-setupSlides();
 
-function setupSlides(){
-  // document.getElementById("debug").innerHTML = "setup";
-  // var parentDiv = e.target;
-  var slides = document.getElementsByClassName("mySlides");
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-  slides[0].style.display = "block";
-
-  slides = document.getElementsByClassName("my2Slides2");
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-  slides[0].style.display = "block";
-}
-
-function showSlides() {
-  // document.getElementById("debug").innerHTML = "show";
+function showSlides(ele) {
   var i;
-  var slides = document.getElementsByClassName("mySlides");
+  var slides = ele.querySelectorAll(".mySlides");
   for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
+    if (i == slideIndex) {
+      slides[i].style.display = "block";
+    }
+    else {
+      slides[i].style.display = "none";
+    }
   }
   slideIndex++;
-  if (slideIndex > slides.length) {slideIndex = 1}
-  slides[slideIndex-1].style.display = "block";
-  showRunning = setTimeout(showSlides, 1500); // Change image every 1.5 seconds
+  if (slideIndex >= slides.length) {slideIndex = 0}
+  showRunning = setTimeout(showSlides, 1500, ele); // Change image every 1.5 seconds
 }
 
-function showSlides2() {
-  // document.getElementById("debug").innerHTML = "show";
-  var i;
-  var slides = document.getElementsByClassName("my2Slides2");
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-  slideIndex++;
-  if (slideIndex > slides.length) {slideIndex = 1}
-  slides[slideIndex-1].style.display = "block";
-  showRunning = setTimeout(showSlides2, 1500); // Change image every 1.5 seconds
-}
-
-function resetSlides(){
+function resetSlides(ele){
   clearTimeout(showRunning);
-  // document.getElementById("debug").innerHTML = "reset";
-  var slides = document.getElementsByClassName("mySlides");
+  var slides = ele.querySelectorAll(".mySlides");
+  slideIndex = 0;
   for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-  slides[0].style.display = "block";
-  slideIndex = 1;
+    if (i == slideIndex) {
+      slides[i].style.display = "block";
+    }
+    else {
+      slides[i].style.display = "none";
+    }
+  }  
 }
 
-function resetSlides2(){
-  clearTimeout(showRunning);
-  // document.getElementById("debug").innerHTML = "reset";
-  var slides = document.getElementsByClassName("my2Slides2");
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";
-  }
-  slides[0].style.display = "block";
-  slideIndex = 1;
-}
 </script>
 
 {% endblock %}
