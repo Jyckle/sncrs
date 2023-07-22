@@ -24,7 +24,7 @@ Try
 
 `docker --version`
 
-If there is no version installed, follow the instructions to install it [here](https://www.docker.com/products/personal/)
+If there is no version installed, follow the instructions to install it [here](https://docs.docker.com/engine/install/)
 
 ### Step 3: Run quick to start the dev container
 

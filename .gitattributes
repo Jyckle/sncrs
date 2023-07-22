@@ -1,6 +1,5 @@
-# Ensure that Git will always convert line endings to LF on checkout
+# Allow git to convert line endings according to its default rules
 * text=auto
-# * text eol=lf # this affected pngs and such...
 
 # specify binary files so EOL won't be changed
 *.webp binary
