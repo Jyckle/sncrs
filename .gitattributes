@@ -1,0 +1,7 @@
+# Allow git to convert line endings according to its default rules
+* text=auto
+
+# specify binary files so EOL won't be changed
+*.webp binary
+*.png binary
+*.jpg binary
