@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
+set -e
 category=$1
 # Possible categories
 # run, stop, backup
 
 ## Container Commands ##
-if [ $category == "run" ] || [ $category == "stop" ]; then
+if [ $category == "run" ] || [ $category == "stop" ] || [ $category == "restart" ]; then
     compose_args=("--env-file")
     post_args=()
     dev_type=$2
@@ -25,6 +26,9 @@ if [ $category == "run" ] || [ $category == "stop" ]; then
         . $env_file && post_args+=("echo" "Application available at http://localhost:${ACCESS_PORT}")
     elif [ $category == "stop" ]; then
         compose_args+=("down")
+    elif [ $category == "restart" ]; then
+        compose_args+=("restart")
+        . $env_file && post_args+=("echo" "Application available at http://localhost:${ACCESS_PORT}")
     fi
     extra_args=${@:3}
     docker compose ${compose_args[@]} ${extra_args[@]}

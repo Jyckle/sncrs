@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 from django.db.models.functions import Lower
 
 import re
@@ -88,6 +89,54 @@ class Alias(models.Model):
     class Meta:
         verbose_name_plural = "aliases"
 
+class SmashNightQuerySet(models.QuerySet):
+    """
+    This class handles any operations that impact multiple SmashNight
+    objects.
+    """
+
+    def get_earliest_sn_in_season(self, season):
+        """
+        Returns the earliest SmashNight object in the season.
+
+        Parameters
+        ----------
+        season : int, required
+            The number of the season to search.
+
+        Returns
+        -------
+        SmashNight
+            The SmashNight object in the set with the smallest night count.
+        """
+        return next(iter(self.filter(season=season).order_by('night_count')), None)
+
+    def get_latest_night_count(self):
+        """
+        Returns the latest night_count of a SmashNight object in the given set.
+
+        Returns
+        -------
+        night_count: int
+            The latest night_count.
+        """
+        latest_sn = next(iter(self.order_by('-night_count')), None)
+        if latest_sn is None:
+            return 0
+        else:
+            return latest_sn.night_count
+
+    def get_latest_season(self) -> int:
+        """
+        Get the latest season in the QuerySet
+
+        Returns
+        -------
+        curr_season: int
+            The current season
+        """
+        curr_season = self.aggregate(Max('season')).get('season__max')
+        return curr_season
 
 class SmashNight(models.Model):
     season = models.IntegerField()
@@ -95,13 +144,38 @@ class SmashNight(models.Model):
     title = models.CharField(max_length=200)
     night_count = models.IntegerField()
     automations_ran = models.BooleanField(default=False)
+    objects = SmashNightQuerySet.as_manager()
 
     def __str__(self):
         return "{} on {}".format(self.title, self.date)
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.night_count = SmashNight.objects.get_latest_night_count() + 1
+            self.title = f"Season {self.season} Night {self.get_season_night_count()}"
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "smashnights"
         ordering = ["-date"]
+    
+    @property
+    def season_night_count(self):
+        """
+        Returns the count of the night within the given season. For instance,
+        even if the overall night count is 50, if it is the first in the season,
+        this will return 1.
+
+        Returns
+        -------
+        int
+            The night count within the current season.
+        """
+        night = 1
+        earliest_smash_night = SmashNight.objects.get_earliest_sn_in_season(self.season)
+        if earliest_smash_night is not None:
+            night = self.night_count - earliest_smash_night.night_count + 1
+        return night
 
 
 class Bracket(models.Model):
