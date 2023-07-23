@@ -195,8 +195,8 @@ class SmashNightManager(models.Manager.from_queryset(SmashNightQuerySet)):
 class SmashNight(models.Model):
     season = models.IntegerField()
     date = models.DateField()
-    title = models.CharField(max_length=200)
-    night_count = models.IntegerField()
+    title = models.CharField(max_length=200, blank=True, null=True)
+    night_count = models.IntegerField(blank=True, null=True)
     automations_ran = models.BooleanField(default=False)
     objects = SmashNightManager()
 
@@ -206,7 +206,9 @@ class SmashNight(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             self.night_count = SmashNight.objects.get_latest_night_count() + 1
-            self.title = f"Season {self.season} Night {self.get_season_night_count()}"
+            earliest_sn = SmashNight.objects.get_earliest_sn_in_season(self.season)
+            earliest = earliest_sn.night_count if earliest_sn else self.night_count
+            self.title = f"SmashNight Season {self.season} Night {self.night_count + 1 - earliest}"
         super().save(*args, **kwargs)
 
     class Meta:
