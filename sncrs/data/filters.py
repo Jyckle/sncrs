@@ -1,12 +1,13 @@
 from django_filters import rest_framework as filters
 from django.db.models import Q
 
-from data.models import Match, PersonSnapshot
+from data.models import Match, PersonSnapshot, SmashNight
 
 class MatchFilter(filters.FilterSet):
     chat_tag = filters.CharFilter(label='chat_tag', field_name='chat_tag', method='both_players_filter')
     player = filters.CharFilter(label='player', field_name='display_name', method='both_players_filter')
     season = filters.CharFilter(label='season', field_name='sn__season')
+    sn_title = filters.CharFilter(label='sn_title', field_name='short_title', method='short_title_filter')
 
     class Meta:
         model = Match
@@ -32,6 +33,10 @@ class MatchFilter(filters.FilterSet):
             filtered_set = self.both_players_filter_single(filtered_set, name, player)
         return filtered_set
     
+    def short_title_filter(self, queryset, name, value):
+        sn = SmashNight.objects.filter(**{name: value}).first()
+        return queryset.filter(Q(sn=sn))
+    
 class SnapshotFilter(filters.FilterSet):
     chat_tag = filters.CharFilter(label='chat_tag', field_name="person__chat_tag")
     player = filters.CharFilter(label='player', field_name="person__display_name")
@@ -40,4 +45,13 @@ class SnapshotFilter(filters.FilterSet):
         model = PersonSnapshot
         fields = [
             'sn',
+        ]
+
+class SmashNightFilter(filters.FilterSet):
+    short_title = filters.CharFilter(label='short_title', field_name="short_title")
+
+    class Meta:
+        model = SmashNight
+        fields = [
+            'night_count',
         ]

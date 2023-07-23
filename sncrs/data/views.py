@@ -3,8 +3,8 @@ from django.db.models import Func, F
 from django.db.models.functions import Lower
 
 from data.models import Match, PersonSnapshot, Person, Team, StageType, SmashNight, Venue
-from data.serializers import MatchSerializer, SnapshotSerializer
-from data.filters import MatchFilter, SnapshotFilter
+from data.serializers import MatchSerializer, SnapshotSerializer, SmashNightSerializer
+from data.filters import MatchFilter, SnapshotFilter, SmashNightFilter
 from rest_framework import generics
 
 
@@ -160,3 +160,8 @@ class SnapshotList(generics.ListAPIView):
     queryset = PersonSnapshot.objects.all()
     serializer_class = SnapshotSerializer
     filterset_class = SnapshotFilter
+
+class SmashNightList(generics.ListAPIView):
+    queryset = SmashNight.objects.all()
+    serializer_class = SmashNightSerializer
+    filterset_class = SmashNightFilter

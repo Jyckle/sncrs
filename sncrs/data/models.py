@@ -1,6 +1,6 @@
 from django.db import models
-from django.db.models import Max
-from django.db.models.functions import Lower
+from django.db.models import Max, F, Value, Q, Count, Case, When, Min, OuterRef, Subquery
+from django.db.models.functions import Lower, Concat
 
 import re
 
@@ -138,13 +138,67 @@ class SmashNightQuerySet(models.QuerySet):
         curr_season = self.aggregate(Max('season')).get('season__max')
         return curr_season
 
+    def set_season_night_count_annotation(self) -> models.QuerySet:
+        """
+        Annotate SmashNights with the season_night_cound
+        The season_night_count is the count of the night within the given season. 
+        For instance, even if the overall night count is 50, if it is the first in 
+        the season, this will be 1.
+        """
+        # First, build a subquery that refers to the outer level season
+        # Aggregate this by season
+        nights_in_season = self.filter(
+            season=OuterRef("season")
+        ).order_by().values('season')
+        # Now, we want the minimum night in the season, based on the night_count
+        min_night_in_season = nights_in_season.annotate(
+            min_night=Min('night_count')
+        ).values('min_night')
+        # Finally, combine the current object's night_count with the 
+        # minimum night_count to find the night it has within the season
+        annotated = self.annotate(
+            season_night_count=(
+                F('night_count')
+                - Subquery(min_night_in_season)
+                + 1
+            )
+        )
+        return annotated
+
+    def set_short_title_annotation(self) -> models.QuerySet:
+        """
+        Annotate smashNights with the short title in the format
+        {season}.{season_night_count}
+        i.e. 5.2
+        """
+        annotated = self.annotate(
+            short_title=Concat(
+                F('season'), 
+                Value('.'), 
+                F('season_night_count'),
+                output_field=models.CharField(),
+            )
+        )
+        return annotated
+
+class SmashNightManager(models.Manager.from_queryset(SmashNightQuerySet)):
+    
+    def get_queryset(self):
+        return (
+            super(SmashNightManager, self)
+            .get_queryset()
+            .set_season_night_count_annotation()
+            .set_short_title_annotation()
+        )
+
+
 class SmashNight(models.Model):
     season = models.IntegerField()
     date = models.DateField()
     title = models.CharField(max_length=200)
     night_count = models.IntegerField()
     automations_ran = models.BooleanField(default=False)
-    objects = SmashNightQuerySet.as_manager()
+    objects = SmashNightManager()
 
     def __str__(self):
         return "{} on {}".format(self.title, self.date)
@@ -158,25 +212,6 @@ class SmashNight(models.Model):
     class Meta:
         verbose_name_plural = "smashnights"
         ordering = ["-date"]
-    
-    @property
-    def season_night_count(self):
-        """
-        Returns the count of the night within the given season. For instance,
-        even if the overall night count is 50, if it is the first in the season,
-        this will return 1.
-
-        Returns
-        -------
-        int
-            The night count within the current season.
-        """
-        night = 1
-        earliest_smash_night = SmashNight.objects.get_earliest_sn_in_season(self.season)
-        if earliest_smash_night is not None:
-            night = self.night_count - earliest_smash_night.night_count + 1
-        return night
-
 
 class Bracket(models.Model):
     sn = models.ForeignKey(SmashNight, on_delete=models.SET_NULL, null=True)
