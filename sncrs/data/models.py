@@ -206,9 +206,8 @@ class SmashNight(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             self.night_count = SmashNight.objects.get_latest_night_count() + 1
-            earliest_sn = SmashNight.objects.get_earliest_sn_in_season(self.season)
-            earliest = earliest_sn.night_count if earliest_sn else self.night_count
-            self.title = f"SmashNight Season {self.season} Night {self.night_count + 1 - earliest}"
+            night_in_season = SmashNight.objects.filter(season=self.season).count() + 1
+            self.title = f"SmashNight Season {self.season} Night {night_in_season}"
         super().save(*args, **kwargs)
 
     class Meta:
