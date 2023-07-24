@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Max, F, Value, Q, Count, Case, When, Min, OuterRef, Subquery
-from django.db.models.functions import Lower, Concat
+from django.db.models.functions import Lower, Concat, Abs
 
 import re
 
@@ -247,6 +247,140 @@ class Placement(models.Model):
     class Meta:
         ordering = ['bracket', 'place']
 
+class MatchQuerySet(models.QuerySet):
+
+    def set_winners_indices(self):
+        return self.annotate(
+            winners_index=Count(
+                'bracket__match__round',
+                filter=Q(
+                    bracket__match__round__gt=F('round')
+                ),
+                distinct=True
+            )
+        )
+
+    def set_losers_indices(self):
+        return self.annotate(
+            losers_index=Count(
+                'bracket__match__round',
+                filter=Q(
+                    bracket__match__round__lt=F('round')
+                ),
+                distinct=True
+            )
+        )
+
+    def set_round_name(self):
+        return self.annotate(
+            round_name=Case(
+                When(
+                    round__gt=0,
+                    then=Case(
+                        When(winners_index=0, then=Value("Grand Finals")),
+                        When(winners_index=1, then=Value("Winners Finals")),
+                        When(winners_index=2, then=Value("Winners Semis")),
+                        When(winners_index=3, then=Value("Winners Quarters")),
+                        default=Concat(
+                            Value("Winners Round "),
+                            F('round'),
+                            output_field=models.CharField()
+                        )
+                    )
+                ),
+                When(
+                    round__lt=0,
+                    then=Case(
+                        When(losers_index=0, then=Value("Losers Finals")),
+                        When(losers_index=1, then=Value("Losers Semis")),
+                        When(losers_index=2, then=Value("Losers Quarters")),
+                        default=Concat(
+                            Value("Losers Round "),
+                            Abs(F('round')),
+                            output_field=models.CharField(),
+                        )
+                    )
+                ),
+                default=Value("")
+            )
+        )
+    
+    def set_title(self):
+        short_title_sq = SmashNight.objects.filter(id=OuterRef('sn__id')).order_by().values('short_title')
+        return self.annotate(
+            title=Concat(
+                # First, place our overall SmashNight Data
+                Value('STL SmashNight '),
+                Subquery(short_title_sq), Value(' '),
+                # Then the bracket title and round name if this is a bracket match
+                Case(
+                    When(
+                        type=0, # Bracket Match
+                        then=Concat(
+                            F('bracket__title'),
+                            Value(' '),
+                            F('round_name'),
+                        ),
+                    ), 
+                    When(type=1, then=Value('Challenge Match')), # Challenge Match
+                    default=Value("")
+                ),
+                Value('-'),
+                # Now the info for player 1
+                F('p1__team__tag'), Value(' | '),
+                F('p1__display_name'),
+                Value('('), F('p1__main_1__name'), Value(')'),
+                Value(' vs '),
+                # The info for player 2
+                F('p2__team__tag'), Value(' | '),
+                F('p2__display_name'),
+                Value('('), F('p2__main_1__name'), Value(')'),
+                output_field=models.CharField()
+            )
+        )
+    
+    def set_description(self):
+        short_title_sq = SmashNight.objects.filter(id=OuterRef('sn__id')).order_by().values('short_title')
+        return self.annotate(
+            description=Concat(
+                # First, place our overall SmashNight Data
+                Subquery(short_title_sq), Value(' | '),
+                # Then the bracket title and round name if this is a bracket match
+                Case(
+                    When(
+                        type=0, # Bracket Match
+                        then=Concat(
+                            F('bracket__title'),
+                            Value(' '),
+                            F('round_name'),
+                        ),
+                    ), 
+                    When(type=1, then=Value('Challenge Match')), # Challenge Match
+                    default=Value("")
+                ),
+                Value(' | '),
+                # Now the info for player 1
+                F('p1__display_name'),
+                Value(' vs '),
+                # The info for player 2
+                F('p2__display_name'),
+                output_field=models.CharField()
+            )
+        )
+
+class MatchManager(models.Manager.from_queryset(MatchQuerySet)):
+
+    def get_queryset(self):
+        return (
+            super(MatchManager, self)
+                .get_queryset()
+                .set_winners_indices()
+                .set_losers_indices()
+                .set_round_name()
+                .set_title()
+                .set_description()
+        )
+
 
 class Match(models.Model):
     p1 = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, related_name='p1_match_set', blank=True)
@@ -262,6 +396,7 @@ class Match(models.Model):
     challonge_id = models.IntegerField(null=True, blank=True)
     match_url = models.URLField(max_length=200, null=True, blank=True)
     round = models.IntegerField(null=True, blank=True)
+    objects = MatchManager()
 
     BRACKET = 0
     CHALLENGE = 1

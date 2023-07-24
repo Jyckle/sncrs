@@ -3,33 +3,44 @@
 set -e
 category=$1
 # Possible categories
-# run, stop, backup
+container_commands=("run" "stop" "restart" "logs")
 
 ## Container Commands ##
-if [ $category == "run" ] || [ $category == "stop" ] || [ $category == "restart" ]; then
+if [[ " ${container_commands[*]} " =~ " ${category} " ]]; then
     compose_args=("--env-file")
     post_args=()
     dev_type=$2
     # options: prod, dev
 
     # set the env files needed
-    if [ $dev_type == "dev" ]; then
-        env_file="config/.env.dev"
-        compose_args+=($env_file)
-    elif [ $dev_type == "prod" ]; then
-        env_file="config/.env.prod"
-        compose_args+=($env_file "--file" "compose.prod.yaml")
-    fi
+    case $dev_type in
+        dev)
+            env_file="config/.env.dev"
+            compose_args+=($env_file)
+            ;;
+        prod)
+            env_file="config/.env.prod"
+            compose_args+=($env_file "--file" "compose.prod.yaml")
+            ;;
+    esac
     # configure the container command
-    if [ $category == "run" ]; then
-        compose_args+=("up" "-d")
-        . $env_file && post_args+=("echo" "Application available at http://localhost:${ACCESS_PORT}")
-    elif [ $category == "stop" ]; then
-        compose_args+=("down")
-    elif [ $category == "restart" ]; then
-        compose_args+=("restart")
-        . $env_file && post_args+=("echo" "Application available at http://localhost:${ACCESS_PORT}")
-    fi
+    case $category in
+        run)
+            compose_args+=("up" "-d")
+            ;;&
+        restart)
+            compose_args+=("restart")
+            ;;&
+        run | restart)
+            . $env_file && post_args+=("echo" "Application available at http://localhost:${ACCESS_PORT}")
+            ;;
+        down)
+            compose_args+=("down")
+            ;;
+        logs)
+            compose_args+=("logs")
+            ;;
+    esac
     extra_args=${@:3}
     docker compose ${compose_args[@]} ${extra_args[@]}
     "${post_args[@]}"

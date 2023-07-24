@@ -26,7 +26,7 @@ Try
 
 If there is no version installed, follow the instructions to install it
 
-### Step 3: Run quick to start the dev container
+### Step 3: Run qs to start the dev container
 
 This one is super easy but might take a minute. Just run:
 
