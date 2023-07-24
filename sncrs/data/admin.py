@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.utils.translation import ngettext
 from django.shortcuts import render
 
+from itertools import chain
+
 from .models import *
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
 from .sn_calculate import full_update
@@ -66,7 +68,10 @@ class SmashNightAdmin(admin.ModelAdmin):
     def show_youtube_details(self, request, queryset):
         details = []
         for sn in queryset.order_by('-date'):
-            for match in sn.match_set.all():
+            for match in chain(
+                sn.match_set.filter(bracket__isnull=False).order_by('-bracket__rank', 'round'),
+                sn.match_set.filter(bracket__isnull=True)
+            ):
                 details.append("Title: {}".format(match.title))
                 details.append("Description: {}".format(match.description))
                 details.append("-------------------------")
