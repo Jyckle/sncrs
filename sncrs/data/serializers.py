@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from data.models import Match, PersonSnapshot
+from data.models import Match, PersonSnapshot, SmashNight
 
 class MatchSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,6 +21,22 @@ class MatchSerializer(serializers.ModelSerializer):
             'match_url',
             'round',
             'type',
+            ]
+
+class SmashNightSerializer(serializers.ModelSerializer):
+    season_night_count = serializers.ReadOnlyField()
+    short_title = serializers.ReadOnlyField()
+
+    class Meta:
+        model = SmashNight
+        fields = [
+            'id', 
+            'season',
+            'date',
+            'title',
+            'night_count',
+            'season_night_count',
+            'short_title',
             ]
         
 class SnapshotSerializer(serializers.ModelSerializer):

@@ -6,91 +6,6 @@ import googleapiclient.errors
 
 from .models import SmashNight, Match
 
-
-def get_night_count(sn=None, match=None):
-    night = 0
-    if sn is not None:
-        earliest_smash_night = SmashNight.objects.filter(season=sn.season).order_by('night_count')[0]
-        night = sn.night_count - earliest_smash_night.night_count + 1
-    elif match is not None:
-        earliest_smash_night = SmashNight.objects.filter(season=match.sn.season).order_by('night_count')[0]
-        night = match.sn.night_count - earliest_smash_night.night_count + 1
-    return night
-
-
-# get the match title for YouTube
-def get_match_title(match):
-    title = ""
-    bracket_format = "STL SmashNight {season}.{night} {bracket_title} {win_lose} "\
-        "Round {round}- {team_1} | {p1}({p1_main}) vs {team_2} | {p2}({p2_main})"
-    challenge_format = "STL SmashNight {season}.{night} "\
-        "Challenge Match- {team_1} | {p1}({p1_main}) vs {team_2} | {p2}({p2_main})"
-    if match.type == Match.BRACKET:
-        title = bracket_format.format(
-            season=match.sn.season,
-            night=get_night_count(match=match),
-            bracket_title=match.bracket.title,
-            win_lose="Winners" if match.round > 0 else "Losers" if match.round < 0 else "",
-            round=abs(match.round),
-            team_1=match.p1.team.tag,
-            team_2=match.p2.team.tag,
-            p1=match.p1.display_name,
-            p2=match.p2.display_name,
-            p1_main=match.p1.main_1.name if match.p1.main_1 is not None else "",
-            p2_main=match.p2.main_1.name if match.p2.main_1 is not None else ""
-        )
-    elif match.type == Match.CHALLENGE:
-        title = challenge_format.format(
-            season=match.sn.season,
-            night=get_night_count(match=match),
-            team_1=match.p1.team.tag,
-            team_2=match.p2.team.tag,
-            p1=match.p1.display_name,
-            p2=match.p2.display_name,
-            p1_main=match.p1.main_1.name if match.p1.main_1 is not None else "",
-            p2_main=match.p2.main_1.name if match.p2.main_1 is not None else ""
-
-        )
-    return title
-
-
-# get the match description for YouTube
-def get_match_description(match):
-    desc = ""
-    if match.type == Match.BRACKET:
-        desc = "S{season}T{night} | {bracket_title}, {win_lose} Round {round} | {p1} vs {p2}".format(
-            season=match.sn.season,
-            night=get_night_count(match=match),
-            bracket_title=match.bracket.title,
-            win_lose="Winners" if match.round > 0 else "Losers" if match.round < 0 else "",
-            round=abs(match.round),
-            p1=match.p1.display_name,
-            p2=match.p2.display_name
-        )
-    elif match.type == Match.CHALLENGE:
-        desc = "S{season}T{night} | Challenge Match | {p1} vs {p2}".format(
-            season=match.sn.season,
-            night=get_night_count(match=match),
-            p1=match.p1.display_name,
-            p2=match.p2.display_name
-        )
-
-    return desc
-
-
-# get title and description for all matches
-def get_titles_and_descriptions(sn):
-    all_details = []
-    for match in sn.match_set.all():
-        all_details.append(
-            {
-                "Title": get_match_title(match),
-                "Description": get_match_description(match)
-            }
-        )
-    return all_details
-
-
 # get the round number given the Description
 def get_round_number(description):
     extracted_round = re.search(r'(?<=round )\d', description)
@@ -117,14 +32,13 @@ def get_smashnight_videos(sn):
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey=os.environ.get('SNCRS_YOUTUBE_DEV_KEY'))
 
-    current_season_night_count = get_night_count(sn=sn)
-    search_string = "{0}.{1}".format(sn.season, current_season_night_count)
+    title = sn.objects.filter(id=sn.id).first().short_title
 
     request = youtube.search().list(
         part="snippet",
         channelId=os.environ.get('SNCRS_YOUTUBE_CHANNEL_ID'),
         maxResults=50,
-        q=search_string,
+        q=title,
         type="video"
     )
     response = request.execute()
@@ -145,7 +59,7 @@ def get_possible_matches(video, sn):
         p2_names.extend([alias.name for alias in match.p2.alias_set.all()])
         # Check if the description and title matches
         if any(item.lower() in title for item in p1_names) and any(item.lower() in title for item in p2_names):
-            if get_match_description(match).lower() in description:
+            if match.description.lower() in description:
                 matches.append(match)
 
     return matches

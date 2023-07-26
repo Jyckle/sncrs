@@ -1,5 +1,6 @@
 from django.db import models
-from django.db.models.functions import Lower
+from django.db.models import Max, F, Value, Q, Count, Case, When, Min, OuterRef, Subquery
+from django.db.models.functions import Lower, Concat, Abs
 
 import re
 
@@ -88,21 +89,130 @@ class Alias(models.Model):
     class Meta:
         verbose_name_plural = "aliases"
 
+class SmashNightQuerySet(models.QuerySet):
+    """
+    This class handles any operations that impact multiple SmashNight
+    objects.
+    """
+
+    def get_earliest_sn_in_season(self, season):
+        """
+        Returns the earliest SmashNight object in the season.
+
+        Parameters
+        ----------
+        season : int, required
+            The number of the season to search.
+
+        Returns
+        -------
+        SmashNight
+            The SmashNight object in the set with the smallest night count.
+        """
+        return next(iter(self.filter(season=season).order_by('night_count')), None)
+
+    def get_latest_night_count(self):
+        """
+        Returns the latest night_count of a SmashNight object in the given set.
+
+        Returns
+        -------
+        night_count: int
+            The latest night_count.
+        """
+        latest_sn = next(iter(self.order_by('-night_count')), None)
+        if latest_sn is None:
+            return 0
+        else:
+            return latest_sn.night_count
+
+    def get_latest_season(self) -> int:
+        """
+        Get the latest season in the QuerySet
+
+        Returns
+        -------
+        curr_season: int
+            The current season
+        """
+        curr_season = self.aggregate(Max('season')).get('season__max')
+        return curr_season
+
+    def set_season_night_count_annotation(self) -> models.QuerySet:
+        """
+        Annotate SmashNights with the season_night_cound
+        The season_night_count is the count of the night within the given season. 
+        For instance, even if the overall night count is 50, if it is the first in 
+        the season, this will be 1.
+        """
+        # First, build a subquery that refers to the outer level season
+        # Aggregate this by season
+        nights_in_season = self.filter(
+            season=OuterRef("season")
+        ).order_by().values('season')
+        # Now, we want the minimum night in the season, based on the night_count
+        min_night_in_season = nights_in_season.annotate(
+            min_night=Min('night_count')
+        ).values('min_night')
+        # Finally, combine the current object's night_count with the 
+        # minimum night_count to find the night it has within the season
+        annotated = self.annotate(
+            season_night_count=(
+                F('night_count')
+                - Subquery(min_night_in_season)
+                + 1
+            )
+        )
+        return annotated
+
+    def set_short_title_annotation(self) -> models.QuerySet:
+        """
+        Annotate smashNights with the short title in the format
+        {season}.{season_night_count}
+        i.e. 5.2
+        """
+        annotated = self.annotate(
+            short_title=Concat(
+                F('season'), 
+                Value('.'), 
+                F('season_night_count'),
+                output_field=models.CharField(),
+            )
+        )
+        return annotated
+
+class SmashNightManager(models.Manager.from_queryset(SmashNightQuerySet)):
+    
+    def get_queryset(self):
+        return (
+            super(SmashNightManager, self)
+            .get_queryset()
+            .set_season_night_count_annotation()
+            .set_short_title_annotation()
+        )
+
 
 class SmashNight(models.Model):
     season = models.IntegerField()
     date = models.DateField()
-    title = models.CharField(max_length=200)
-    night_count = models.IntegerField()
+    title = models.CharField(max_length=200, blank=True, null=True)
+    night_count = models.IntegerField(blank=True, null=True)
     automations_ran = models.BooleanField(default=False)
+    objects = SmashNightManager()
 
     def __str__(self):
         return "{} on {}".format(self.title, self.date)
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.night_count = SmashNight.objects.get_latest_night_count() + 1
+            night_in_season = SmashNight.objects.filter(season=self.season).count() + 1
+            self.title = f"SmashNight Season {self.season} Night {night_in_season}"
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "smashnights"
         ordering = ["-date"]
-
 
 class Bracket(models.Model):
     sn = models.ForeignKey(SmashNight, on_delete=models.SET_NULL, null=True)
@@ -137,6 +247,140 @@ class Placement(models.Model):
     class Meta:
         ordering = ['bracket', 'place']
 
+class MatchQuerySet(models.QuerySet):
+
+    def set_winners_indices(self):
+        return self.annotate(
+            winners_index=Count(
+                'bracket__match__round',
+                filter=Q(
+                    bracket__match__round__gt=F('round')
+                ),
+                distinct=True
+            )
+        )
+
+    def set_losers_indices(self):
+        return self.annotate(
+            losers_index=Count(
+                'bracket__match__round',
+                filter=Q(
+                    bracket__match__round__lt=F('round')
+                ),
+                distinct=True
+            )
+        )
+
+    def set_round_name(self):
+        return self.annotate(
+            round_name=Case(
+                When(
+                    round__gt=0,
+                    then=Case(
+                        When(winners_index=0, then=Value("Grand Finals")),
+                        When(winners_index=1, then=Value("Winners Finals")),
+                        When(winners_index=2, then=Value("Winners Semis")),
+                        When(winners_index=3, then=Value("Winners Quarters")),
+                        default=Concat(
+                            Value("Winners Round "),
+                            F('round'),
+                            output_field=models.CharField()
+                        )
+                    )
+                ),
+                When(
+                    round__lt=0,
+                    then=Case(
+                        When(losers_index=0, then=Value("Losers Finals")),
+                        When(losers_index=1, then=Value("Losers Semis")),
+                        When(losers_index=2, then=Value("Losers Quarters")),
+                        default=Concat(
+                            Value("Losers Round "),
+                            Abs(F('round')),
+                            output_field=models.CharField(),
+                        )
+                    )
+                ),
+                default=Value("")
+            )
+        )
+    
+    def set_title(self):
+        short_title_sq = SmashNight.objects.filter(id=OuterRef('sn__id')).order_by().values('short_title')
+        return self.annotate(
+            title=Concat(
+                # First, place our overall SmashNight Data
+                Value('STL SmashNight '),
+                Subquery(short_title_sq), Value(' '),
+                # Then the bracket title and round name if this is a bracket match
+                Case(
+                    When(
+                        type=0, # Bracket Match
+                        then=Concat(
+                            F('bracket__title'),
+                            Value(' '),
+                            F('round_name'),
+                        ),
+                    ), 
+                    When(type=1, then=Value('Challenge Match')), # Challenge Match
+                    default=Value("")
+                ),
+                Value('-'),
+                # Now the info for player 1
+                F('p1__team__tag'), Value(' | '),
+                F('p1__display_name'),
+                Value('('), F('p1__main_1__name'), Value(')'),
+                Value(' vs '),
+                # The info for player 2
+                F('p2__team__tag'), Value(' | '),
+                F('p2__display_name'),
+                Value('('), F('p2__main_1__name'), Value(')'),
+                output_field=models.CharField()
+            )
+        )
+    
+    def set_description(self):
+        short_title_sq = SmashNight.objects.filter(id=OuterRef('sn__id')).order_by().values('short_title')
+        return self.annotate(
+            description=Concat(
+                # First, place our overall SmashNight Data
+                Subquery(short_title_sq), Value(' | '),
+                # Then the bracket title and round name if this is a bracket match
+                Case(
+                    When(
+                        type=0, # Bracket Match
+                        then=Concat(
+                            F('bracket__title'),
+                            Value(' '),
+                            F('round_name'),
+                        ),
+                    ), 
+                    When(type=1, then=Value('Challenge Match')), # Challenge Match
+                    default=Value("")
+                ),
+                Value(' | '),
+                # Now the info for player 1
+                F('p1__display_name'),
+                Value(' vs '),
+                # The info for player 2
+                F('p2__display_name'),
+                output_field=models.CharField()
+            )
+        )
+
+class MatchManager(models.Manager.from_queryset(MatchQuerySet)):
+
+    def get_queryset(self):
+        return (
+            super(MatchManager, self)
+                .get_queryset()
+                .set_winners_indices()
+                .set_losers_indices()
+                .set_round_name()
+                .set_title()
+                .set_description()
+        )
+
 
 class Match(models.Model):
     p1 = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, related_name='p1_match_set', blank=True)
@@ -152,6 +396,7 @@ class Match(models.Model):
     challonge_id = models.IntegerField(null=True, blank=True)
     match_url = models.URLField(max_length=200, null=True, blank=True)
     round = models.IntegerField(null=True, blank=True)
+    objects = MatchManager()
 
     BRACKET = 0
     CHALLENGE = 1

@@ -3,10 +3,12 @@ from django.contrib import messages
 from django.utils.translation import ngettext
 from django.shortcuts import render
 
+from itertools import chain
+
 from .models import *
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
 from .sn_calculate import full_update
-from .youtube_logic import get_titles_and_descriptions, set_videos
+from .youtube_logic import set_videos
 # Register your models here.
 
 
@@ -66,10 +68,12 @@ class SmashNightAdmin(admin.ModelAdmin):
     def show_youtube_details(self, request, queryset):
         details = []
         for sn in queryset.order_by('-date'):
-            items = get_titles_and_descriptions(sn)
-            for item in items:
-                details.append("Title: {}".format(item["Title"]))
-                details.append("Description: {}".format(item["Description"]))
+            for match in chain(
+                sn.match_set.filter(bracket__isnull=False).order_by('-bracket__rank', 'round'),
+                sn.match_set.filter(bracket__isnull=True)
+            ):
+                details.append("Title: {}".format(match.title))
+                details.append("Description: {}".format(match.description))
                 details.append("-------------------------")
         context = {
             "list": details,
