@@ -1,6 +1,11 @@
 # Allow git to convert line endings according to its default rules
 * text=auto
 
+*.py text eol=lf
+*.sh text eol=lf
+*.txt text eol=lf
+Containerfile text eol=lf
+
 # specify binary files so EOL won't be changed
 *.webp binary
 *.png binary
