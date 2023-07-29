@@ -36,12 +36,8 @@
                 <td>--</td>
               {% endif %}
               <td>{{snapshot.person.display_name}}
-                  {% if snapshot.person.team.tag == "GG" %}
-                    <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_gg.png' %}">
-                  {% elif snapshot.person.team.tag == "TSM" %}
-                    <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_tsm.png' %}">
-                  {% elif snapshot.person.team.tag == "DH" %}
-                    <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_dh.png' %}">
+                  {% if snapshot.person.team.icon %}
+                    <img style= "max-width:20px; max-height:20px" src="{{snapshot.person.team.icon.url}}" alt="Team icon for {{snapshot.person.team.name}}">
                   {% endif %}
               </td>
             </tr>
@@ -54,14 +50,10 @@
               <td>{{person.score}}</td>
               <td>--</td>
               <td>{{person.display_name}}
-                {% if person.team.tag == "GG" %}
-                  <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_gg.png' %}">
-                {% elif person.team.tag == "TSM" %}
-                  <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_tsm.png' %}">
-                {% elif person.team.tag == "DH" %}
-                  <img style= "max-width:20px; max-height:20px" src="{% static 'data/icon_dh.png' %}">
+                {% if person.team.icon %}
+                  <img style= "max-width:20px; max-height:20px" src="{{person.team.icon.url}}" alt="Team icon for {{person.team.name}}">
                 {% endif %}
-	      </td>
+	            </td>
             </tr>
           {% endfor %}
         {% endif %}

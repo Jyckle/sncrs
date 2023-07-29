@@ -25,6 +25,8 @@ class Team(models.Model):
     name = models.CharField(max_length=200)
     tag = models.CharField(max_length=10)
     team_color = models.CharField(max_length=7, default="#FFFFFF")
+    logo = models.ImageField(upload_to='team/logo', null=True, blank=True)
+    icon = models.ImageField(upload_to='team/icon', null=True, blank=True)
 
     def __str__(self):
         return self.name
