@@ -24,15 +24,11 @@
       <tbody>
         {% for person in person_list %}
           <tr>
-            {% if person.team.tag == "DH" %}
-            <td scope="row" class="sticky-left"><img style= "max-width:75px; max-height:75px" src="{% static 'data/logo_dh.png' %}""></td>
-            {% elif person.team.tag == "GG" %}
-            <td scope="row" class="sticky-left"><img style= "max-width:75px; max-height:75px" src="{% static 'data/logo_gg.png' %}""></td>
-            {% elif person.team.tag == "GST" %}
-            <td scope="row" class="sticky-left"><img style= "max-width:75px; max-height:75px" src="{% static 'data/logo_5.png' %}""></td>
-            {% elif person.team.tag == "TSM" %}
-            <td scope="row" class="sticky-left"><img style= "max-width:75px; max-height:75px" src="{% static 'data/logo_tsm.png' %}""></td>
-            {% endif %}
+            <td>
+              {% if person.team.logo %}
+              <img style="max-width:75px; max-height:75px" src="{{person.team.logo.url}}" alt="Team logo for {{person.team.name}}">
+              {% endif %}
+            </td>
             <th>{{person.display_name}}</th>
             <td>{{person.rank}}</td>
             <td>{{person.score}}</td>

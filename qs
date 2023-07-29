@@ -34,7 +34,7 @@ if [[ " ${container_commands[*]} " =~ " ${category} " ]]; then
         run | restart)
             . $env_file && post_args+=("echo" "Application available at http://localhost:${ACCESS_PORT}")
             ;;
-        down)
+        stop)
             compose_args+=("down")
             ;;
         logs)
