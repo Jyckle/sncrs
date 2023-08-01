@@ -59,16 +59,31 @@ Then, the magic happens! Voila!
 
 ### Set up backups
 
-Note: This will only back up the production postgres container
+```bash
+./qs backup install <prod|dev>
+```
+
+### Update the backup script without changing the cron job
 
 ```bash
-./qs backup install
+./qs backup update <prod|dev>
 ```
 
 ### Back up immediately
 
 ```bash
-./qs backup now
+./qs backup now <prod|dev> [local_file_location]
 ```
+
+If local_file_location is provided, the backup file will be placed in that location. This is ideal for local testing
+
+### Restore from a backup
+
+```bash
+./qs backup restore <prod|dev> [file_location]
+```
+
+The backup will be restored to the specified container (prod|dev). Note that this includes media files and all database info.
+This will clear out existing data, so be careful!
 
 ## Long Live SmashNights!
