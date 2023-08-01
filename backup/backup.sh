@@ -24,11 +24,13 @@ if [ -z $sncrs_web_container ]; then
     exit 1
 fi
 # Copy the media files into the backup location
-docker run -v ${WORK_DIR}:/backup --rm --volumes-from $sncrs_web_container ubuntu bash -c "cp -r /sncrs/media /backup/media && chmod -R 777 /backup && tar czf /tmp/${BACKUP_FILE_NAME} /backup && cp /tmp/${BACKUP_FILE_NAME} /backup/"
+docker run -v ${WORK_DIR}:/backup --rm --volumes-from $sncrs_web_container ubuntu bash -c \
+"cp -r /sncrs/media /backup/media && chmod -R 777 /backup && tar czf /tmp/${BACKUP_FILE_NAME} /backup && cp /tmp/${BACKUP_FILE_NAME} /backup/"
 if [ -n "$local_file_dest" ]; then
     cp "${BACKUP_FILE_PATH}" "${local_file_dest}"
 else
     for dest in "$RCLONE_DESTS"; do
         rclone -vv --no-check-dest copy "${BACKUP_FILE_PATH}" "${dest}"
+        rclone delete "${dest}" --min-age 1w --max-depth 1 --include '*sncrs*'
     done
 fi
