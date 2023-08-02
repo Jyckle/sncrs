@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from data.models import Match, PersonSnapshot, SmashNight, Person
+from data.models import Match, PersonSnapshot, SmashNight, Person, Character
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
     allow_null=True,
@@ -70,13 +70,12 @@ class SnapshotSerializer(serializers.ModelSerializer):
             'end_rank',
             'start_score',
             'end_score',
-            ]
+            ] 
+    
 
 class PersonSerializer(serializers.ModelSerializer):
     debut = serializers.ReadOnlyField()
-    main_1 = name_related_serializer()
-    main_2 = name_related_serializer()
-    main_3 = name_related_serializer()
+    mains = serializers.SerializerMethodField()
     rival_1 = display_name_related_serializer()
     rival_2 = display_name_related_serializer()
     bracket_demon = display_name_related_serializer()
@@ -97,9 +96,10 @@ class PersonSerializer(serializers.ModelSerializer):
             'rank',
             'score',
             'bracket_demon',
-            'main_1',
-            'main_2',
-            'main_3',
             'tag',
             'debut',
+            'mains',
             ]
+    
+    def get_mains(self, obj):
+        return obj.main_set.all().order_by('order').values_list('character__name', flat=True)

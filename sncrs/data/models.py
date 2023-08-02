@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Max, F, Value, Q, Count, Case, When, Min, OuterRef, Subquery
 from django.db.models.functions import Lower, Concat, Abs
+from django.db import transaction
 
 import re
 
@@ -68,9 +69,7 @@ class Person(models.Model):
         blank=True,
         related_name='demon_set'
     )
-    main_1 = models.ForeignKey(Character, on_delete=models.SET_NULL, null=True, blank=True, related_name='main_1_set')
-    main_2 = models.ForeignKey(Character, on_delete=models.SET_NULL, null=True, blank=True, related_name='main_2_set')
-    main_3 = models.ForeignKey(Character, on_delete=models.SET_NULL, null=True, blank=True, related_name='main_3_set')
+    mains = models.ManyToManyField(Character, through="PreferredCharacter")
 
     MEMBER = 0
     GUEST = 1
@@ -102,7 +101,21 @@ class Person(models.Model):
     class Meta:
         verbose_name_plural = "people"
         ordering = [Lower("display_name")]
+    
+    @transaction.atomic
+    def update_mains_order(self):
+        if self.main_set.all():
+            max_order = self.main_set.all().aggregate(Max('order')).get('order__max')
+            if max_order is None: max_order = -1
+            for preferred_character in self.main_set.filter(order__isnull=True):
+                preferred_character.order = max_order + 1
+                preferred_character.save()
+                max_order += 1
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.update_mains_order()
+        
 
 class Alias(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
@@ -113,6 +126,18 @@ class Alias(models.Model):
 
     class Meta:
         verbose_name_plural = "aliases"
+
+class PreferredCharacter(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="main_set")
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    order = models.IntegerField(null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.person}: {self.character}"
+
+    class Meta:
+        ordering = ["order"]
+
 
 class SmashNightQuerySet(models.QuerySet):
     """
@@ -332,6 +357,8 @@ class MatchQuerySet(models.QuerySet):
     
     def set_title(self):
         short_title_sq = SmashNight.objects.filter(id=OuterRef('sn__id')).order_by().values('short_title')
+        p1_main_name = PreferredCharacter.objects.filter(person__id=OuterRef('p1__id')).order_by('order').values('character__name')[:1]
+        p2_main_name = PreferredCharacter.objects.filter(person__id=OuterRef('p2__id')).order_by('order').values('character__name')[:1]
         return self.annotate(
             title=Concat(
                 # First, place our overall SmashNight Data
@@ -354,12 +381,12 @@ class MatchQuerySet(models.QuerySet):
                 # Now the info for player 1
                 F('p1__team__tag'), Value(' | '),
                 F('p1__display_name'),
-                Value('('), F('p1__main_1__name'), Value(')'),
+                Value('('), Subquery(p1_main_name), Value(')'),
                 Value(' vs '),
                 # The info for player 2
                 F('p2__team__tag'), Value(' | '),
                 F('p2__display_name'),
-                Value('('), F('p2__main_1__name'), Value(')'),
+                Value('('), Subquery(p2_main_name), Value(')'),
                 output_field=models.CharField()
             )
         )

@@ -9,6 +9,16 @@ def subtract(value, arg):
     return value - arg
 
 @register.filter
+def filled_slice(value, desired_length):
+    desired_length = int(desired_length)
+    resulting_list = []
+    for x in value:
+        resulting_list.append(x)
+        desired_length -= 1
+    resulting_list += [None] * desired_length
+    return resulting_list
+
+@register.filter
 def check_attendee_seed(c_sn, c_person):
     try:
         attendee = c_sn.attendee_set.get(person=c_person)

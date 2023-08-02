@@ -6,6 +6,7 @@
 
 {% block content %}
 {% load static %}
+{% load extra_filters %}
 <div class="container">
 <div class="container table-wrapper">
   <table class="table table-dark table-bordered align-middle text-center table-sticky table-custom-striped">
@@ -33,44 +34,20 @@
             <td>{{person.rank}}</td>
             <td>{{person.score}}</td>
 
-            {% if person.main_1 != None %}
-            <td>
-              <img 
-                style= "max-width:75px; max-height:75px" 
-                src="{% static person.main_1.static_image_name %}"
-                onerror="this.onerror = null; this.src='{{person.main_1.image_url}}'"
-                alt="{{person.main_1.name}}"
-              >
-            </td>
-            {% else %}
-            <td>--</td>
-            {% endif %}
-
-            {% if person.main_2 != None %}
-            <td>
-              <img
-                style= "max-width:75px; max-height:75px" 
-                src="{% static person.main_2.static_image_name %}"
-                onerror="this.onerror = null; this.src='{{person.main_2.image_url}}'"
-                alt="{{person.main_2.name}}"
-              >
-            </td>
-            {% else %}
-            <td>--</td>
-            {% endif %}
-
-            {% if person.main_3 != None %}
-            <td>
-              <img 
-                style= "max-width:75px; max-height:75px" 
-                src="{% static person.main_3.static_image_name %}"
-                onerror="this.onerror = null; this.src='{{person.main_3.image_url}}'"
-                alt="{{person.main_3.name}}"
-              >
-            </td>
-            {% else %}
-            <td>--</td>
-            {% endif %}
+            {% for main in person.main_set.all|filled_slice:3 %}
+              {% if main != None %}
+              <td>
+                <img 
+                  style= "max-width:75px; max-height:75px" 
+                  src="{% static main.character.static_image_name %}"
+                  onerror="this.onerror = null; this.src='{{main.character.image_url}}'"
+                  alt="{{main.character.name}}"
+                >
+              </td>
+              {% else %}
+              <td>--</td>
+              {% endif %}
+            {% endfor %}
 
             {% if person.rival_1 != None %}
               <td class="rival">{{person.rival_1.display_name}}</td>
