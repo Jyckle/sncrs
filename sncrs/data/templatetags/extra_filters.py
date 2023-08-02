@@ -12,7 +12,7 @@ def subtract(value, arg):
 def filled_slice(value, desired_length):
     desired_length = int(desired_length)
     resulting_list = []
-    for x in value:
+    for x in value[:desired_length]:
         resulting_list.append(x)
         desired_length -= 1
     resulting_list += [None] * desired_length

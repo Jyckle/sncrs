@@ -100,22 +100,7 @@ class Person(models.Model):
 
     class Meta:
         verbose_name_plural = "people"
-        ordering = [Lower("display_name")]
-    
-    @transaction.atomic
-    def update_mains_order(self):
-        if self.main_set.all():
-            max_order = self.main_set.all().aggregate(Max('order')).get('order__max')
-            if max_order is None: max_order = -1
-            for preferred_character in self.main_set.filter(order__isnull=True):
-                preferred_character.order = max_order + 1
-                preferred_character.save()
-                max_order += 1
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.update_mains_order()
-        
+        ordering = [Lower("display_name")]    
 
 class Alias(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
@@ -131,12 +116,24 @@ class PreferredCharacter(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="main_set")
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
     order = models.IntegerField(null=True, blank=True)
-    
+
     def __str__(self):
         return f"{self.person}: {self.character}"
 
     class Meta:
         ordering = ["order"]
+
+    @transaction.atomic
+    def update_mains_order(self):
+        if self.order is None:
+            max_order = self.person.main_set.all().aggregate(Max('order')).get('order__max')
+            if max_order is None: max_order = -1
+            self.order = max_order + 1
+
+    def save(self, *args, **kwargs):
+        self.update_mains_order()
+        super().save(*args, **kwargs)
+        
 
 
 class SmashNightQuerySet(models.QuerySet):
