@@ -31,6 +31,27 @@ class Team(models.Model):
     def __str__(self):
         return self.name
 
+class PersonQuerySet(models.QuerySet):
+    """
+    A class for operations on a set of :class:`Person` objects.
+
+    If there are methods that operate on a per-person basis, they should
+    not be included here.
+    """
+    def set_debut(self):
+        short_title_sq = SmashNight.objects.filter(personsnapshot__person__id=OuterRef('id')).order_by('date').values('short_title')[:1]
+        return self.annotate(
+            debut=Subquery(short_title_sq)
+        )
+
+class PersonManager(models.Manager.from_queryset(PersonQuerySet)):
+
+    def get_queryset(self):
+        return (
+            super(PersonManager, self)
+            .get_queryset()
+            .set_debut()
+        )
 
 class Person(models.Model):
     display_name = models.CharField(max_length=100)
@@ -72,6 +93,8 @@ class Person(models.Model):
     ]
     status = models.IntegerField(choices=STATUS_CHOICES, default=CHALLENGER)
     chat_tag = models.CharField(max_length=35, null=True, blank=True)
+
+    objects = PersonManager()
 
     def __str__(self):
         return self.display_name

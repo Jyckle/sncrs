@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filters
 from django.db.models import Q
 
-from data.models import Match, PersonSnapshot, SmashNight
+from data.models import Match, PersonSnapshot, SmashNight, Person
 
 class MatchFilter(filters.FilterSet):
     chat_tag = filters.CharFilter(label='chat_tag', field_name='chat_tag', method='both_players_filter')
@@ -54,4 +54,16 @@ class SmashNightFilter(filters.FilterSet):
         model = SmashNight
         fields = [
             'night_count',
+        ]
+    
+class PersonFilter(filters.FilterSet):
+    debut = filters.CharFilter(label='debut', field_name="debut")
+
+    class Meta:
+        model = Person 
+        fields = [
+            'chat_tag',
+            'display_name',
+            'tag',
+            'team',
         ]

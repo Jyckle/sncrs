@@ -1,8 +1,21 @@
 from rest_framework import serializers
 
-from data.models import Match, PersonSnapshot, SmashNight
+from data.models import Match, PersonSnapshot, SmashNight, Person
+
+display_name_related_serializer = lambda: serializers.SlugRelatedField(
+    allow_null=True,
+    read_only=True,
+    slug_field='display_name'
+)
+name_related_serializer = lambda: serializers.SlugRelatedField(
+    allow_null=True,
+    read_only=True,
+    slug_field='name'
+)
 
 class MatchSerializer(serializers.ModelSerializer):
+    p1 = display_name_related_serializer()
+    p2 = display_name_related_serializer()
     class Meta:
         model = Match
         fields = [
@@ -40,6 +53,13 @@ class SmashNightSerializer(serializers.ModelSerializer):
             ]
         
 class SnapshotSerializer(serializers.ModelSerializer):
+    person = display_name_related_serializer()
+    sn = serializers.SlugRelatedField(
+        allow_null=True,
+        read_only=True,
+        slug_field='title'
+    )
+    
     class Meta:
         model = PersonSnapshot
         fields = [
@@ -50,4 +70,36 @@ class SnapshotSerializer(serializers.ModelSerializer):
             'end_rank',
             'start_score',
             'end_score',
+            ]
+
+class PersonSerializer(serializers.ModelSerializer):
+    debut = serializers.ReadOnlyField()
+    main_1 = name_related_serializer()
+    main_2 = name_related_serializer()
+    main_3 = name_related_serializer()
+    rival_1 = display_name_related_serializer()
+    rival_2 = display_name_related_serializer()
+    bracket_demon = display_name_related_serializer()
+    team = name_related_serializer()
+    tag = serializers.CharField(
+        source='get_tag_display'
+    )
+
+    class Meta:
+        model = Person
+        fields = [
+            'id',
+            'display_name',
+            'chat_tag',
+            'rival_1',
+            'rival_2',
+            'team',
+            'rank',
+            'score',
+            'bracket_demon',
+            'main_1',
+            'main_2',
+            'main_3',
+            'tag',
+            'debut',
             ]
