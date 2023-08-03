@@ -48,18 +48,14 @@
               <td>--</td>
               {% endif %}
             {% endfor %}
-
-            {% if person.rival_1 != None %}
-              <td class="rival">{{person.rival_1.display_name}}</td>
-            {% else %}
-              <td>--</td>
-            {% endif %}
-
-            {% if person.rival_2 != None %}
-              <td class="rival">{{person.rival_2.display_name}}</td>
-            {% else %}
-              <td>--</td>
-            {% endif %}
+            
+            {% for rival in person.rivals.all|filled_slice:2 %}
+              {% if rival != None %}
+                <td class="rival">{{rival}}</td>
+              {% else %}
+                <td>--</td>
+              {% endif %}
+            {% endfor %}
 
             {% if person.bracket_demon != None %}
               <td class="demon">{{person.bracket_demon.display_name}}</td>

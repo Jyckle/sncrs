@@ -1,6 +1,6 @@
 from django.db import models
-from django.db.models import Max, F, Value, Q, Count, Case, When, Min, OuterRef, Subquery
-from django.db.models.functions import Lower, Concat, Abs
+from django.db.models import Max, F, Value, Q, Count, Case, When, Min, OuterRef, Subquery, Sum
+from django.db.models.functions import Lower, Concat, Abs, Coalesce, Cast
 from django.db import transaction
 
 import re
@@ -60,8 +60,6 @@ class Person(models.Model):
     rank = models.IntegerField(null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
     friend_code = models.CharField(max_length=20, null=True, blank=True)
-    rival_1 = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name='rival_1_set')
-    rival_2 = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name='rival_2_set')
     bracket_demon = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -100,7 +98,11 @@ class Person(models.Model):
 
     class Meta:
         verbose_name_plural = "people"
-        ordering = [Lower("display_name")]    
+        ordering = [Lower("display_name")]
+
+    @property
+    def rivals(self):
+        return self.px_matchup_set.order_by('-rival_score').values_list('py__display_name', flat=True)
 
 class Alias(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
@@ -416,6 +418,91 @@ class MatchQuerySet(models.QuerySet):
                 output_field=models.CharField()
             )
         )
+    
+    def get_player_game_wins(self, px: Person, py: Person) -> tuple[int, int]:
+        """
+        Return the total player wins from all matches between these two people
+
+        Parameters
+        ----------
+        px, py: Person
+            The two individuals to check the matches for
+
+        Returns
+        -------
+        int, int
+            px's total game wins, py's total game wins
+        """
+        aggregated_vals = self.aggregate(
+            px_wins=Sum(
+                Case(
+                    When(p1=px, p2=py, then=F('p1_wins')),
+                    When(p1=py, p2=px, then=F('p2_wins')),
+                    default=0
+                )
+            ),
+            py_wins=Sum(
+                Case(
+                    When(p1=py, p2=px, then=F('p1_wins')),
+                    When(p1=px, p2=py, then=F('p2_wins')),
+                    default=0
+                )
+            ),
+        )
+        return (
+            aggregated_vals['px_wins'],
+            aggregated_vals['py_wins'],
+        )
+
+    def get_player_set_wins(self, px: Person, py: Person) -> tuple[int, int]:
+        """
+        Return the total set wins from all matches between these two people
+
+        Parameters
+        ----------
+        px, py: Person
+            The two individuals to check the matches for
+
+        Returns
+        -------
+        int, int
+            px's total set wins, py's total set wins
+        """
+        aggregated_vals = self.aggregate(
+            px_wins=Count('pk', filter=Q(p1=px, p2=py, p1_wins__gt=F('p2_wins'))) 
+            + Count('pk', filter=Q(p1=py, p2=px, p2_wins__gt=F('p1_wins'))),
+            py_wins=Count('pk', filter=Q(p1=py, p2=px, p1_wins__gt=F('p2_wins')))
+            + Count('pk', filter=Q(p1=px, p2=py, p2_wins__gt=F('p1_wins'))),
+        )
+        return (
+            aggregated_vals['px_wins'],
+            aggregated_vals['py_wins'],
+        )
+
+    def set_winner_and_loser_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the id of the winner and loser
+        """
+        annotated = self.annotate(
+            winner=Coalesce(
+                Case(
+                    When(p1_wins__gt=F('p2_wins'), then=F('p1')),
+                    When(p1_wins__lt=F('p2_wins'), then=F('p2')),
+                    default=None
+                ),
+                None
+            ),
+            loser=Coalesce(
+                Case(
+                    When(p1_wins__gt=F('p2_wins'), then=F('p2')),
+                    When(p1_wins__lt=F('p2_wins'), then=F('p1')),
+                    default=None
+                ),
+                None
+            )
+        )
+        return annotated
+
 
 class MatchManager(models.Manager.from_queryset(MatchQuerySet)):
 
@@ -428,6 +515,7 @@ class MatchManager(models.Manager.from_queryset(MatchQuerySet)):
                 .set_round_name()
                 .set_title()
                 .set_description()
+                .set_winner_and_loser_annotation()
         )
 
 
@@ -534,6 +622,83 @@ class PersonSnapshot(models.Model):
         ordering = ["sn__date", "person__team", "person__display_name"]
 
 
+class MatchupQuerySet(models.QuerySet):
+    """
+    A class for operations on a set of :class:`Matchup` objects.
+
+    If there are methods that operate on a per-matchup basis, they should
+    not be included here.
+    """
+
+    def set_total_game_wins_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the total number of wins
+        """
+        annotated = self.annotate(
+            px_total_game_wins=Coalesce(F('px_wins') + F('px_additional_wins'), 0),
+            py_total_game_wins=Coalesce(F('py_wins') + F('py_additional_wins'), 0),
+        )
+        return annotated
+
+    def set_total_set_wins_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the total number of wins
+        """
+        annotated = self.annotate(
+            px_total_set_wins=Coalesce(F('px_set_wins') + F('px_additional_set_wins'), 0),
+            py_total_set_wins=Coalesce(F('py_set_wins') + F('py_additional_set_wins'), 0),
+        )
+        return annotated
+
+    def set_total_sets_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the total number of games played
+        """
+        total_set_wins_annotated = self.set_total_set_wins_annotation()
+        annotated = total_set_wins_annotated.annotate(
+            total_sets=Coalesce(F('px_total_set_wins') + F('py_total_set_wins'), 0)
+        )
+        return annotated
+
+    def set_total_games_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the total number of games played
+        """
+        total_wins_annotated = self.set_total_game_wins_annotation()
+        annotated = total_wins_annotated.annotate(
+            total_games=Coalesce(F('px_total_game_wins') + F('py_total_game_wins'), 0)
+        )
+        return annotated
+
+    def set_rival_score_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the rival score
+        This score indicates the status of person y as a rival to person x
+        with higher values indicating person y is more likely to be a rival for person x
+        """
+        total_wins_annotated = self.set_total_game_wins_annotation()
+        annotated = total_wins_annotated.annotate(
+            rival_score=Cast(
+                Coalesce(
+                    Case(
+                        When(px_total_game_wins=0.0, py_total_game_wins=0.0, then=-1000.0),
+                        default=(
+                            5.0 * (F('px_total_game_wins') + F('py_total_game_wins')) -
+                            6.0 * Abs(F('px_total_game_wins') - F('py_total_game_wins'))
+                        )
+                    ),
+                    -1000.0
+                ),
+                output_field=models.FloatField())
+        )
+        return annotated
+
+class MatchupManager(models.Manager.from_queryset(MatchupQuerySet)):
+
+    def get_queryset(self):
+        return super(MatchupManager, self).get_queryset()\
+            .set_rival_score_annotation()
+
 class Matchup(models.Model):
     px = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, related_name='px_matchup_set')
     py = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, related_name='py_matchup_set')
@@ -552,6 +717,7 @@ class Matchup(models.Model):
         null=True,
         related_name='set_matchup_set'
     )
+    objects = MatchupManager()
 
     def __str__(self):
         return "{} vs. {}".format(self.px, self.py)

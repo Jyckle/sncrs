@@ -6,7 +6,7 @@ from .bracket_logic import create_all_bracket_ranks
 from .attendee_logic import create_all_attendee_ranks, update_attendee_scores
 from .matchup_logic import create_matchup_table
 from .snapshot_logic import store_scores
-from .opponent_logic import set_all_rivals, set_all_demons
+from .opponent_logic import set_all_demons
 
 
 def set_challonge_data(sn):
@@ -47,9 +47,6 @@ def full_update(sn):
         store_scores(sn, "end")
         sn.automations_ran = True
         sn.save()
-
-    # set everyone's rivals as calculated by the new data
-    set_all_rivals()
 
     # set everyone's demon as calculated by the new data
     set_all_demons()

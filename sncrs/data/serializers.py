@@ -76,8 +76,7 @@ class SnapshotSerializer(serializers.ModelSerializer):
 class PersonSerializer(serializers.ModelSerializer):
     debut = serializers.ReadOnlyField()
     mains = serializers.SerializerMethodField()
-    rival_1 = display_name_related_serializer()
-    rival_2 = display_name_related_serializer()
+    rivals = serializers.SerializerMethodField()
     bracket_demon = display_name_related_serializer()
     team = name_related_serializer()
     tag = serializers.CharField(
@@ -90,8 +89,7 @@ class PersonSerializer(serializers.ModelSerializer):
             'id',
             'display_name',
             'chat_tag',
-            'rival_1',
-            'rival_2',
+            'rivals',
             'team',
             'rank',
             'score',
@@ -103,3 +101,6 @@ class PersonSerializer(serializers.ModelSerializer):
     
     def get_mains(self, obj):
         return obj.main_set.all().order_by('order').values_list('character__name', flat=True)
+
+    def get_rivals(self, obj):
+        return obj.rivals[:2]
