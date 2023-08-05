@@ -95,8 +95,10 @@ if [ $category == "backup" ]; then
         trap "rm -rf $WORK_DIR" EXIT
         cp $backup_file_location $WORK_DIR/restore.tar.gz
         tar xzf $WORK_DIR/restore.tar.gz -C $WORK_DIR
-        docker cp $WORK_DIR/backup/media/. $sncrs_web_container:/sncrs/media/.
-        docker exec $sncrs_web_container chown -R www-data:www-data /sncrs/media
+        # Extra slashes in the two lines below are to prevent
+        # Git Bash from expanding to windows paths
+        docker cp $WORK_DIR/backup/media/. $sncrs_web_container://sncrs/media
+        docker exec $sncrs_web_container chown -R www-data:www-data //sncrs/media
         cat $WORK_DIR/backup/sncrs-db.sql | docker exec -i $sncrs_postgres_container psql -U $POSTGRES_USER -d postgres
         ;;
     esac
