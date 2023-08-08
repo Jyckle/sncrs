@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from data.models import Match, PersonSnapshot, SmashNight, Person, Character
+from data.models import Match, PersonSnapshot, SmashNight, Person, Character, Greeting
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
     allow_null=True,
@@ -77,6 +77,7 @@ class PersonSerializer(serializers.ModelSerializer):
     debut = serializers.ReadOnlyField()
     mains = serializers.SerializerMethodField()
     rivals = serializers.SerializerMethodField()
+    all_names = serializers.SerializerMethodField()
     bracket_demon = display_name_related_serializer()
     team = name_related_serializer()
     tag = serializers.CharField(
@@ -88,6 +89,7 @@ class PersonSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'display_name',
+            'all_names',
             'chat_tag',
             'rivals',
             'team',
@@ -104,3 +106,20 @@ class PersonSerializer(serializers.ModelSerializer):
 
     def get_rivals(self, obj):
         return obj.rivals[:2]
+    
+    def get_all_names(self, obj):
+        return [obj.display_name, *list(obj.alias_set.values_list('name', flat=True))]
+
+
+
+class GreetingSerializer(serializers.ModelSerializer):
+    person = display_name_related_serializer()
+
+    class Meta:
+        model = Greeting
+        fields = [
+            'id',
+            'person',
+            'content',
+            'name',
+            ]

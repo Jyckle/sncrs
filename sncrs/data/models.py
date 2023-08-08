@@ -738,3 +738,17 @@ class VenueImage(models.Model):
     image = models.ImageField(upload_to=f'venues')
     venue = models.ForeignKey(Venue, related_name='images', on_delete=models.DO_NOTHING)
 
+class Greeting(models.Model):
+    name = models.CharField(max_length=255)
+    content = models.TextField()
+    person = models.ForeignKey(Person, null=True, blank=True, related_name="greetings", on_delete=models.DO_NOTHING)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            person_to_assign = Person.objects.filter(Q(display_name__iexact=self.name) | Q(alias__name__iexact=self.name)).distinct()
+            if len(person_to_assign) == 1:
+                self.person = person_to_assign[0]
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.name}: {self.content}"

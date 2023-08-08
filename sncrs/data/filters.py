@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filters
 from django.db.models import Q
 
-from data.models import Match, PersonSnapshot, SmashNight, Person
+from data.models import Match, PersonSnapshot, SmashNight, Person, Greeting
 
 class MatchFilter(filters.FilterSet):
     chat_tag = filters.CharFilter(label='chat_tag', field_name='chat_tag', method='both_players_filter')
@@ -58,12 +58,37 @@ class SmashNightFilter(filters.FilterSet):
     
 class PersonFilter(filters.FilterSet):
     debut = filters.CharFilter(label='debut', field_name="debut")
+    name = filters.CharFilter(label='name', method='all_names_filter')
 
     class Meta:
-        model = Person 
+        model = Person
         fields = [
             'chat_tag',
             'display_name',
             'tag',
             'team',
+            'name',
+        ]
+    
+    def all_names_filter(self, queryset, name, value):
+        """Create a query filtering both display name and aliases on the field
+        specified by field_name, for the value in value"""
+        player = value
+        display_name_arg = {f'display_name__iexact': player}
+        alias_arg = {f'alias__name__iexact': player}
+        return queryset.filter(Q(**display_name_arg) | Q(**alias_arg)).distinct()
+
+
+class GreetingFilter(filters.FilterSet):
+    person = filters.CharFilter(label='person', field_name="person__display_name", lookup_expr="iexact")
+    name = filters.CharFilter(label='name', lookup_expr="iexact")
+    content = filters.CharFilter(label='content', lookup_expr="icontains")
+
+
+    class Meta:
+        model = Greeting
+        fields = [
+            'person',
+            'name',
+            'content',
         ]
