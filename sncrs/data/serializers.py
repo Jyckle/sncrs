@@ -90,7 +90,6 @@ class PersonSerializer(serializers.ModelSerializer):
             'id',
             'display_name',
             'all_names',
-            'chat_tag',
             'rivals',
             'team',
             'rank',

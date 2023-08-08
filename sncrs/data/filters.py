@@ -4,7 +4,6 @@ from django.db.models import Q
 from data.models import Match, PersonSnapshot, SmashNight, Person, Greeting
 
 class MatchFilter(filters.FilterSet):
-    chat_tag = filters.CharFilter(label='chat_tag', field_name='chat_tag', method='both_players_filter')
     player = filters.CharFilter(label='player', field_name='display_name', method='both_players_filter')
     season = filters.CharFilter(label='season', field_name='sn__season')
     sn_title = filters.CharFilter(label='sn_title', field_name='short_title', method='short_title_filter')
@@ -38,7 +37,6 @@ class MatchFilter(filters.FilterSet):
         return queryset.filter(Q(sn=sn))
     
 class SnapshotFilter(filters.FilterSet):
-    chat_tag = filters.CharFilter(label='chat_tag', field_name="person__chat_tag")
     player = filters.CharFilter(label='player', field_name="person__display_name")
 
     class Meta:
@@ -63,7 +61,6 @@ class PersonFilter(filters.FilterSet):
     class Meta:
         model = Person
         fields = [
-            'chat_tag',
             'display_name',
             'tag',
             'team',
