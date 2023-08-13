@@ -89,7 +89,7 @@ class Person(models.Model):
         (OTHER, "Other")
     ]
     status = models.IntegerField(choices=STATUS_CHOICES, default=CHALLENGER)
-    
+
     objects = PersonManager()
 
     def __str__(self):
@@ -696,6 +696,8 @@ class MatchupManager(models.Manager.from_queryset(MatchupQuerySet)):
 
     def get_queryset(self):
         return super(MatchupManager, self).get_queryset()\
+            .set_total_sets_annotation()\
+            .set_total_games_annotation()\
             .set_rival_score_annotation()
 
 class Matchup(models.Model):

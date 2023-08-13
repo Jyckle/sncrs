@@ -4,15 +4,16 @@ from django.db.models.functions import Lower
 
 from data.models import (
     Match, PersonSnapshot, Person, Team,
-    StageType, SmashNight, Venue, Greeting
+    StageType, SmashNight, Venue, Greeting,
+    Matchup
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
-    PersonSerializer, GreetingSerializer
+    PersonSerializer, GreetingSerializer, MatchupSerializer
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
-    GreetingFilter
+    GreetingFilter, MatchupFilter
 )
 from rest_framework import generics
 
@@ -184,3 +185,8 @@ class GreetingList(generics.ListAPIView):
     queryset = Greeting.objects.all()
     serializer_class = GreetingSerializer
     filterset_class = GreetingFilter
+
+class MatchupList(generics.ListAPIView):
+    queryset = Matchup.objects.all()
+    serializer_class = MatchupSerializer
+    filterset_class = MatchupFilter

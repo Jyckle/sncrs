@@ -1,7 +1,10 @@
 from django_filters import rest_framework as filters
 from django.db.models import Q
 
-from data.models import Match, PersonSnapshot, SmashNight, Person, Greeting
+from data.models import (
+    Match, PersonSnapshot, SmashNight, Person,
+    Greeting, Matchup
+)
 
 class MatchFilter(filters.FilterSet):
     player = filters.CharFilter(label='player', field_name='display_name', method='both_players_filter')
@@ -88,4 +91,16 @@ class GreetingFilter(filters.FilterSet):
             'person',
             'name',
             'content',
+        ]
+
+class MatchupFilter(filters.FilterSet):
+    px = filters.CharFilter(label='px', field_name="px__display_name", lookup_expr="iexact")
+    py = filters.CharFilter(label='py', field_name="py__display_name", lookup_expr="iexact")
+
+
+    class Meta:
+        model = Matchup
+        fields = [
+            'px',
+            'py',
         ]

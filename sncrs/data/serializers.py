@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from data.models import Match, PersonSnapshot, SmashNight, Person, Character, Greeting
+from data.models import (
+    Match, PersonSnapshot, SmashNight,
+    Person, Character, Greeting, Matchup
+)
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
     allow_null=True,
@@ -122,3 +125,27 @@ class GreetingSerializer(serializers.ModelSerializer):
             'content',
             'name',
             ]
+
+
+class MatchupSerializer(serializers.ModelSerializer):
+    px = display_name_related_serializer()
+    py = display_name_related_serializer()
+    px_total_game_wins = serializers.ReadOnlyField()
+    py_total_game_wins = serializers.ReadOnlyField()
+    px_total_set_wins = serializers.ReadOnlyField()
+    py_total_set_wins = serializers.ReadOnlyField()
+    total_sets = serializers.ReadOnlyField()
+    total_games = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Matchup
+        fields = [
+            'px',
+            'py',
+            'px_total_game_wins',
+            'py_total_game_wins',
+            'px_total_set_wins',
+            'py_total_set_wins',
+            'total_sets',
+            'total_games', 
+        ]
