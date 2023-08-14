@@ -49,23 +49,57 @@ fi
 ## Backup Commands ##
 if [ $category == "backup" ]; then
     action=$2
-    . "config/.env.prod"
-    if [ $action == "install" ]; then
+    con_type=${3:-prod}
+    config_file="config/.env.${con_type}"
+    . $config_file
+    case $action in
+    install|update)
         mkdir -p $SNCRS_BACKUP_DIR
-        cp "config/.env.prod" $SNCRS_BACKUP_DIR/.env
+        cp $config_file $SNCRS_BACKUP_DIR/
         script_location=$SNCRS_BACKUP_DIR/backup.sh 
         cp "backup/backup.sh" $script_location
-        if crontab -l | grep -q $script_location ; then
+        ;;&
+    install)
+        if crontab -l | grep -q "$script_location $con_type" ; then
             echo "Cron job already installed"
         else
-            (crontab -l 2>/dev/null; echo "0 12 * * * $script_location") | crontab -
+            (crontab -l 2>/dev/null; echo "0 12 * * * $script_location $con_type") | crontab -
         fi
-    elif [ $action == "now" ]; then
+        ;;
+    now)
+        local_file="$4"
         script_location="$SNCRS_BACKUP_DIR/backup.sh"
         if [ -f $script_location ]; then
-            $script_location
+            $script_location $con_type $local_file
         else
             echo "Backup script is not correctly placed, please run 'qs backup install'"
         fi
-    fi
+        ;;
+    restore)
+        backup_file_location="$4"
+        if ! [ -e $backup_file_location ]; then
+            echo "Error: There is no file available at $backup_file_location"
+            exit 1
+        fi
+        sncrs_postgres_container=$(docker container ls | grep "sncrs_$con_type"'[^ ]*db' | head -n 1 | cut -f1,1 -d" ")
+        if [ -z $sncrs_postgres_container ]; then
+            echo "Error: The sncrs postgres container is not available, can't restore backup"
+            exit 1
+        fi
+        sncrs_web_container=$(docker container ls | grep "sncrs_$con_type"'[^ ]*web' | head -n 1 | cut -f1,1 -d" ")
+        if [ -z $sncrs_web_container ]; then
+            echo "Error: The sncrs web container is not available, can't restore backup"
+            exit 1
+        fi
+        WORK_DIR=$(mktemp -d)
+        trap "rm -rf $WORK_DIR" EXIT
+        cp $backup_file_location $WORK_DIR/restore.tar.gz
+        tar xzf $WORK_DIR/restore.tar.gz -C $WORK_DIR
+        # Extra slashes in the two lines below are to prevent
+        # Git Bash from expanding to windows paths
+        docker cp $WORK_DIR/backup/media/. $sncrs_web_container://sncrs/media
+        docker exec $sncrs_web_container chown -R www-data:www-data //sncrs/media
+        cat $WORK_DIR/backup/sncrs-db.sql | docker exec -i $sncrs_postgres_container psql -U $POSTGRES_USER -d postgres
+        ;;
+    esac
 fi
