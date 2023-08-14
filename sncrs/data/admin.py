@@ -5,7 +5,12 @@ from django.shortcuts import render
 
 from itertools import chain
 
-from .models import *
+from .models import (
+    Alias, Seed, Placement, Attendee, Bracket,
+    VenueImage, Venue, Character, PreferredCharacter,
+    Person, SmashNight, Team, Match, StageType, Stage,
+    MatchupType, Matchup, PersonSnapshot, Greeting
+)
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
 from .sn_calculate import full_update
 from .youtube_logic import set_videos
@@ -15,10 +20,17 @@ from .youtube_logic import set_videos
 class AliasInline(admin.TabularInline):
     model = Alias
 
+class GreetingInline(admin.TabularInline):
+    model = Greeting
+
+class PreferredCharacterInline(admin.TabularInline):
+    model = PreferredCharacter
 
 class PersonAdmin(admin.ModelAdmin):
     inlines = [
-        AliasInline
+        AliasInline,
+        PreferredCharacterInline,
+        GreetingInline,
     ]
 
 
@@ -122,6 +134,8 @@ admin.site.register(Bracket, BracketAdmin)
 admin.site.register(Match)
 admin.site.register(Attendee)
 admin.site.register(Alias)
+admin.site.register(Greeting)
+admin.site.register(PreferredCharacter)
 admin.site.register(Seed)
 admin.site.register(Placement)
 admin.site.register(StageType, StageTypeAdmin)

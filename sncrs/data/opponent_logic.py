@@ -34,15 +34,6 @@ def get_rank_difference(person_a, person_b):
     return abs(person_a.rank - person_b.rank)
 
 
-def get_rivals(person_a):
-    person_list = Person.objects.filter(tag=Person.MEMBER)
-    scores = {}
-    for person_b in person_list:
-        scores[person_b] = (-get_opponent_score(person_a, person_b, "rival"), get_rank_difference(person_a, person_b))
-    rivals = [rival for (rival, value) in sorted(scores.items(), key=lambda x: (x[1][0], x[1][1]))]
-    return rivals[0], rivals[1]
-
-
 def get_demon(person_a):
     person_list = Person.objects.filter(tag=Person.MEMBER)
     scores = {}
@@ -50,16 +41,6 @@ def get_demon(person_a):
         scores[person_b] = (-get_opponent_score(person_a, person_b, "demon"), get_rank_difference(person_a, person_b))
     demons = [demon for (demon, value) in sorted(scores.items(), key=lambda x: (x[1][0], x[1][1]))]
     return demons[0]
-
-
-def set_all_rivals():
-    person_list = Person.objects.filter(tag=Person.MEMBER)
-    for person in person_list:
-        rivals = get_rivals(person)
-        person.rival_1 = rivals[0]
-        person.rival_2 = rivals[1]
-        person.save()
-    return
 
 
 def set_all_demons():

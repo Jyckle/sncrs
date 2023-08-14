@@ -2,9 +2,19 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Func, F
 from django.db.models.functions import Lower
 
-from data.models import Match, PersonSnapshot, Person, Team, StageType, SmashNight, Venue
-from data.serializers import MatchSerializer, SnapshotSerializer, SmashNightSerializer
-from data.filters import MatchFilter, SnapshotFilter, SmashNightFilter
+from data.models import (
+    Match, PersonSnapshot, Person, Team,
+    StageType, SmashNight, Venue, Greeting,
+    Matchup
+)
+from data.serializers import (
+    MatchSerializer, SnapshotSerializer, SmashNightSerializer,
+    PersonSerializer, GreetingSerializer, MatchupSerializer
+)
+from data.filters import (
+    MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
+    GreetingFilter, MatchupFilter
+)
 from rest_framework import generics
 
 
@@ -165,3 +175,18 @@ class SmashNightList(generics.ListAPIView):
     queryset = SmashNight.objects.all()
     serializer_class = SmashNightSerializer
     filterset_class = SmashNightFilter
+
+class PersonList(generics.ListAPIView):
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
+    filterset_class = PersonFilter
+
+class GreetingList(generics.ListAPIView):
+    queryset = Greeting.objects.all()
+    serializer_class = GreetingSerializer
+    filterset_class = GreetingFilter
+
+class MatchupList(generics.ListAPIView):
+    queryset = Matchup.objects.all()
+    serializer_class = MatchupSerializer
+    filterset_class = MatchupFilter

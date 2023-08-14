@@ -1,10 +1,9 @@
 FROM python:3.11-slim as builder
 
 # Install nginx
-RUN <<EOF
-apt update -y
+RUN \ 
+apt update -y && \
 apt-get install nginx netcat-traditional -y
-EOF
 
 COPY nginx.default /etc/nginx/sites-available/default
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
@@ -15,10 +14,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 EXPOSE 8020
 WORKDIR /sncrs
 COPY requirements.txt start_server.sh /sncrs
-RUN <<EOF
-pip install --upgrade pip
+RUN \ 
+pip install --upgrade pip && \
 pip install -r requirements.txt --no-cache-dir
-EOF
 COPY . /sncrs
 RUN chown -R www-data:www-data /sncrs
 STOPSIGNAL SIGTERM

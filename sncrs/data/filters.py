@@ -1,10 +1,12 @@
 from django_filters import rest_framework as filters
 from django.db.models import Q
 
-from data.models import Match, PersonSnapshot, SmashNight
+from data.models import (
+    Match, PersonSnapshot, SmashNight, Person,
+    Greeting, Matchup
+)
 
 class MatchFilter(filters.FilterSet):
-    chat_tag = filters.CharFilter(label='chat_tag', field_name='chat_tag', method='both_players_filter')
     player = filters.CharFilter(label='player', field_name='display_name', method='both_players_filter')
     season = filters.CharFilter(label='season', field_name='sn__season')
     sn_title = filters.CharFilter(label='sn_title', field_name='short_title', method='short_title_filter')
@@ -38,7 +40,6 @@ class MatchFilter(filters.FilterSet):
         return queryset.filter(Q(sn=sn))
     
 class SnapshotFilter(filters.FilterSet):
-    chat_tag = filters.CharFilter(label='chat_tag', field_name="person__chat_tag")
     player = filters.CharFilter(label='player', field_name="person__display_name")
 
     class Meta:
@@ -54,4 +55,52 @@ class SmashNightFilter(filters.FilterSet):
         model = SmashNight
         fields = [
             'night_count',
+        ]
+    
+class PersonFilter(filters.FilterSet):
+    debut = filters.CharFilter(label='debut', field_name="debut")
+    name = filters.CharFilter(label='name', method='all_names_filter')
+
+    class Meta:
+        model = Person
+        fields = [
+            'display_name',
+            'tag',
+            'team',
+            'name',
+        ]
+    
+    def all_names_filter(self, queryset, name, value):
+        """Create a query filtering both display name and aliases on the field
+        specified by field_name, for the value in value"""
+        player = value
+        display_name_arg = {f'display_name__iexact': player}
+        alias_arg = {f'alias__name__iexact': player}
+        return queryset.filter(Q(**display_name_arg) | Q(**alias_arg)).distinct()
+
+
+class GreetingFilter(filters.FilterSet):
+    person = filters.CharFilter(label='person', field_name="person__display_name", lookup_expr="iexact")
+    name = filters.CharFilter(label='name', lookup_expr="iexact")
+    content = filters.CharFilter(label='content', lookup_expr="icontains")
+
+
+    class Meta:
+        model = Greeting
+        fields = [
+            'person',
+            'name',
+            'content',
+        ]
+
+class MatchupFilter(filters.FilterSet):
+    px = filters.CharFilter(label='px', field_name="px__display_name", lookup_expr="iexact")
+    py = filters.CharFilter(label='py', field_name="py__display_name", lookup_expr="iexact")
+
+
+    class Meta:
+        model = Matchup
+        fields = [
+            'px',
+            'py',
         ]
