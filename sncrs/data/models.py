@@ -753,3 +753,11 @@ class Greeting(models.Model):
     
     def __str__(self):
         return f"{self.name}: {self.content}"
+
+class Clip(models.Model):
+    url = models.URLField(max_length=200, null=True, blank=True)
+    title = models.TextField()
+
+class ClipTag(models.Model):
+    tag = models.CharField(max_length=50)
+    clip = models.ForeignKey(Clip, related_name='tags', on_delete=models.CASCADE)
