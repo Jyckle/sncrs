@@ -9,8 +9,10 @@ from .models import (
     Alias, Seed, Placement, Attendee, Bracket,
     VenueImage, Venue, Character, PreferredCharacter,
     Person, SmashNight, Team, Match, StageType, Stage,
-    MatchupType, Matchup, PersonSnapshot, Greeting, Clip, ClipTag, Whine
+    MatchupType, Matchup, PersonSnapshot, Greeting, Clip,
+    ClipTag, Whine, SocialLink
 )
+
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
 from .sn_calculate import full_update
 from .youtube_logic import set_videos
@@ -26,6 +28,9 @@ class GreetingInline(admin.TabularInline):
 class WhineInline(admin.TabularInline):
     model = Whine
 
+class SocialLinkInLine(admin.TabularInline):
+    model = SocialLink
+
 class PreferredCharacterInline(admin.TabularInline):
     model = PreferredCharacter
 
@@ -35,6 +40,7 @@ class PersonAdmin(admin.ModelAdmin):
         PreferredCharacterInline,
         GreetingInline,
         WhineInline,
+        SocialLinkInLine,
     ]
 
 
@@ -144,6 +150,7 @@ admin.site.register(Attendee)
 admin.site.register(Alias)
 admin.site.register(Greeting)
 admin.site.register(Whine)
+admin.site.register(SocialLink)
 admin.site.register(PreferredCharacter)
 admin.site.register(Seed)
 admin.site.register(Placement)

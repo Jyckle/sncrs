@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from data.models import (
     Match, PersonSnapshot, SmashNight,
-    Person, Character, Greeting, Matchup, Clip, ClipTag, Whine
+    Person, Character, Greeting, Matchup, 
+    Clip, ClipTag, Whine, SocialLink
 )
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
@@ -101,6 +102,7 @@ class PersonSerializer(serializers.ModelSerializer):
             'tag',
             'debut',
             'mains',
+            'socials',
             ]
     
     def get_mains(self, obj):
