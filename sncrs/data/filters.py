@@ -113,6 +113,7 @@ class ClipFilter(filters.FilterSet):
     class Meta:
         model = Clip
         fields = [
+            'id',
             'title',
             'tags',
         ]

@@ -124,15 +124,11 @@ class VenueAdmin(admin.ModelAdmin):
     inlines = [VenueImageAdmin]
     class Meta:
         model = Venue
-
-class ClipTagInline(admin.TabularInline):
-    model = ClipTag
     
 class ClipAdmin(admin.ModelAdmin):
-    inlines = [ClipTagInline]
+    filter_horizontal = ('tags', )
     class Meta:
         model = Clip
-
 
 admin.site.register(Character)
 admin.site.register(Team, TeamAdmin)

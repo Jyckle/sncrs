@@ -166,6 +166,7 @@ class ClipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clip
         fields = [
+            'id',
             'tags',
             'title',
             'url',
@@ -175,5 +176,6 @@ class ClipSerializer(serializers.ModelSerializer):
         tag_data = validated_data.pop("tags")
         clip = Clip.objects.create(**validated_data)
         for tag in tag_data:
-            clip.tags.create(tag=tag)
+            tag_object, _ = ClipTag.objects.get_or_create(tag=tag)
+            clip.tags.add(tag_object.id)
         return clip

@@ -194,4 +194,8 @@ class MatchupList(generics.ListAPIView):
 class ClipList(generics.ListCreateAPIView):
     queryset = Clip.objects.all()
     serializer_class = ClipSerializer
-    filterset_class = ClipFilter    
+    filterset_class = ClipFilter
+
+class ClipDeleteView(generics.RetrieveDestroyAPIView):
+    queryset = Clip.objects.all()
+    serializer_class = ClipSerializer
