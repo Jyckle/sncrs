@@ -10,7 +10,7 @@ from .models import (
     VenueImage, Venue, Character, PreferredCharacter,
     Person, SmashNight, Team, Match, StageType, Stage,
     MatchupType, Matchup, PersonSnapshot, Greeting, Clip,
-    ClipTag, Whine, SocialLink
+    ClipTag, Whine, SocialLink, Site
 )
 
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
@@ -150,6 +150,7 @@ admin.site.register(Attendee)
 admin.site.register(Alias)
 admin.site.register(Greeting)
 admin.site.register(Whine)
+admin.site.register(Site)
 admin.site.register(SocialLink)
 admin.site.register(PreferredCharacter)
 admin.site.register(Seed)
@@ -163,3 +164,4 @@ admin.site.register(VenueImage)
 admin.site.register(Venue, VenueAdmin)
 admin.site.register(ClipTag)
 admin.site.register(Clip, ClipAdmin)
+

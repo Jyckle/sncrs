@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
-    Greeting, Matchup, Clip, Whine
+    Greeting, Matchup, Clip, Whine, SocialLink
 )
 
 class MatchFilter(filters.FilterSet):
@@ -84,7 +84,6 @@ class GreetingFilter(filters.FilterSet):
     name = filters.CharFilter(label='name', lookup_expr="iexact")
     content = filters.CharFilter(label='content', lookup_expr="icontains")
 
-
     class Meta:
         model = Greeting
         fields = [
@@ -93,10 +92,10 @@ class GreetingFilter(filters.FilterSet):
             'content',
         ]
 
+
 class MatchupFilter(filters.FilterSet):
     px = filters.CharFilter(label='px', field_name="px__display_name", lookup_expr="iexact")
     py = filters.CharFilter(label='py', field_name="py__display_name", lookup_expr="iexact")
-
 
     class Meta:
         model = Matchup
@@ -104,6 +103,7 @@ class MatchupFilter(filters.FilterSet):
             'px',
             'py',
         ]
+
 
 class ClipFilter(filters.FilterSet):
     tags = filters.CharFilter(label='tags', field_name="tags__tag", lookup_expr="iexact")
@@ -117,11 +117,11 @@ class ClipFilter(filters.FilterSet):
             'tags',
         ]
 
+
 class WhineFilter(filters.FilterSet):
     person = filters.CharFilter(label='person', field_name="person__display_name", lookup_expr="iexact")
     name = filters.CharFilter(label='name', lookup_expr="iexact")
     text = filters.CharFilter(label='content', lookup_expr="icontains")
-
 
     class Meta:
         model = Whine
@@ -130,3 +130,15 @@ class WhineFilter(filters.FilterSet):
             'name',
             'text',
         ]
+
+
+class SocialLinkFilter(filters.FilterSet):
+    site = filters.CharFilter(label='site', field_name="site__name", lookup_expr="iexact")
+    person = filters.CharFilter(label='person', field_name="person__display_name", lookup_expr="in")
+
+    class Meta:
+        model = SocialLink
+        fields = {
+            'site',
+            'person',
+        }

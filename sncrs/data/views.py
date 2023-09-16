@@ -5,15 +5,17 @@ from django.db.models.functions import Lower
 from data.models import (
     Match, PersonSnapshot, Person, Team,
     StageType, SmashNight, Venue, Greeting,
-    Matchup, Clip, Whine
+    Matchup, Clip, Whine, SocialLink
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
-    PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer, WhineSerializer
+    PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer, 
+    WhineSerializer, SocialLinkSerializer
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
-    GreetingFilter, MatchupFilter, ClipFilter, WhineFilter
+    GreetingFilter, MatchupFilter, ClipFilter, WhineFilter,
+    SocialLinkFilter
 )
 from rest_framework import generics, permissions
 
@@ -206,3 +208,8 @@ class WhineList(generics.ListAPIView):
     queryset = Whine.objects.all()
     serializer_class = WhineSerializer
     filterset_class = WhineFilter
+
+class SocialLinkList(generics.ListAPIView):
+    queryset = SocialLink.objects.all()
+    serializer_class = SocialLinkSerializer
+    filterset_class = SocialLinkFilter

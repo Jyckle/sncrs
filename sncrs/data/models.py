@@ -777,8 +777,13 @@ class Whine(models.Model):
     def __str__(self):
         return f"{self.name}: {self.text}"
 
-class SocialLink(models.Model):
-    site = models.CharField(max_length=50)
-    link = models.URLField(max_length=200, null=True, blank=True)
-    person = models.ForeignKey(Person, related_name="socials", on_delete=models.CASCADE)
+class Site(models.Model):
+    name = models.CharField(max_length=50, unique=True)
 
+    def __str__(self):
+        return self.name    
+
+class SocialLink(models.Model):
+    site = models.ForeignKey(Site, related_name="social_links", on_delete=models.CASCADE)
+    url = models.URLField(max_length=200, null=True, blank=True)
+    person = models.ForeignKey(Person, related_name="socials", on_delete=models.CASCADE)

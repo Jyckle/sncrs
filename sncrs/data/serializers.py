@@ -3,7 +3,7 @@ from rest_framework import serializers
 from data.models import (
     Match, PersonSnapshot, SmashNight,
     Person, Character, Greeting, Matchup, 
-    Clip, ClipTag, Whine, SocialLink
+    Clip, ClipTag, Whine, SocialLink, Site
 )
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
@@ -76,10 +76,17 @@ class SnapshotSerializer(serializers.ModelSerializer):
             'end_score',
             ] 
 
+class SiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Site
+        fields = ('name',)
+
 class SocialLinkSerializer(serializers.ModelSerializer):
+    person = display_name_related_serializer()
+    site = SiteSerializer()
     class Meta:
         model = SocialLink
-        fields = ('site', 'link')
+        fields = ('person', 'site', 'url', 'id')
 
 class PersonSerializer(serializers.ModelSerializer):
     debut = serializers.ReadOnlyField()
