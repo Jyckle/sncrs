@@ -75,7 +75,11 @@ class SnapshotSerializer(serializers.ModelSerializer):
             'start_score',
             'end_score',
             ] 
-    
+
+class SocialLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialLink
+        fields = ('site', 'link')
 
 class PersonSerializer(serializers.ModelSerializer):
     debut = serializers.ReadOnlyField()
@@ -87,6 +91,7 @@ class PersonSerializer(serializers.ModelSerializer):
     tag = serializers.CharField(
         source='get_tag_display'
     )
+    socials = SocialLinkSerializer(many=True)
 
     class Meta:
         model = Person
