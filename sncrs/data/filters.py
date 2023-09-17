@@ -6,6 +6,9 @@ from data.models import (
     Greeting, Matchup, Clip, Whine, SocialLink
 )
 
+class CharInFilter(filters.BaseInFilter, filters.CharFilter):
+    pass
+
 class MatchFilter(filters.FilterSet):
     player = filters.CharFilter(label='player', field_name='display_name', method='both_players_filter')
     season = filters.CharFilter(label='season', field_name='sn__season')
@@ -134,7 +137,7 @@ class WhineFilter(filters.FilterSet):
 
 class SocialLinkFilter(filters.FilterSet):
     site = filters.CharFilter(label='site', field_name="site__name", lookup_expr="iexact")
-    person = filters.CharFilter(label='person', field_name="person__display_name", lookup_expr="in")
+    person__in = CharInFilter(label='person__in', field_name="person__display_name", lookup_expr="in")
 
     class Meta:
         model = SocialLink
