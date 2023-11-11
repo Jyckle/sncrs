@@ -109,7 +109,6 @@ class ClipFilter(filters.FilterSet):
     tags = filters.CharFilter(label='tags', field_name="tags__tag", lookup_expr="iexact")
     title = filters.CharFilter(label='title', lookup_expr="icontains")
 
-
     class Meta:
         model = Clip
         fields = [

@@ -19,5 +19,5 @@ if [ "$LIVE_RELOAD" = "true" ]; then
     reload_args=('--reload')
 fi
 
-(cd /sncrs/; gunicorn sncrs.wsgi ${reload_args[@]} --user www-data --bind 0.0.0.0:8010 --workers 3) &
+(cd /sncrs/; gunicorn sncrs.wsgi ${reload_args[@]} --timeout 1200 --user www-data --bind 0.0.0.0:8010 --workers 3) &
 nginx -g "daemon off;"

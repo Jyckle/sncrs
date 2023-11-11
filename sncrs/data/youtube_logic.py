@@ -32,7 +32,7 @@ def get_smashnight_videos(sn):
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey=os.environ.get('SNCRS_YOUTUBE_DEV_KEY'))
 
-    title = sn.objects.filter(id=sn.id).first().short_title
+    title = SmashNight.objects.filter(id=sn.id).first().short_title
 
     request = youtube.search().list(
         part="snippet",
