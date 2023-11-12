@@ -15,7 +15,7 @@ from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
     GreetingFilter, MatchupFilter, ClipFilter
 )
-from rest_framework import generics
+from rest_framework import generics, permissions
 
 
 def initialize_sn_set(request):
@@ -195,7 +195,9 @@ class ClipList(generics.ListCreateAPIView):
     queryset = Clip.objects.all()
     serializer_class = ClipSerializer
     filterset_class = ClipFilter
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 class ClipDeleteView(generics.RetrieveDestroyAPIView):
     queryset = Clip.objects.all()
     serializer_class = ClipSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]

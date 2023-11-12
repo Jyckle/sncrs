@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from data.views import (
@@ -15,6 +15,7 @@ urlpatterns = [
     path('matchups/', MatchupList.as_view(), name='matchups'),
     path('clips/', ClipList.as_view(), name='clips'),
     path('clip/<int:pk>/', ClipDeleteView.as_view(), name='clip'),
+    path('auth/', include('rest_framework.urls'))
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
