@@ -753,3 +753,18 @@ class Greeting(models.Model):
     
     def __str__(self):
         return f"{self.name}: {self.content}"
+
+class ClipTag(models.Model):
+    tag = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.tag
+
+class Clip(models.Model):
+    url = models.URLField(max_length=200, null=True, blank=True)
+    title = models.TextField()
+    tags = models.ManyToManyField(ClipTag, related_name='clips')
+
+    def __str__(self):
+        return f"{self.title}: {' | '.join(self.tags.values_list('tag', flat=True))}"
+

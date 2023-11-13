@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
-    Greeting, Matchup
+    Greeting, Matchup, Clip
 )
 
 class MatchFilter(filters.FilterSet):
@@ -103,4 +103,16 @@ class MatchupFilter(filters.FilterSet):
         fields = [
             'px',
             'py',
+        ]
+
+class ClipFilter(filters.FilterSet):
+    tags = filters.CharFilter(label='tags', field_name="tags__tag", lookup_expr="iexact")
+    title = filters.CharFilter(label='title', lookup_expr="icontains")
+
+    class Meta:
+        model = Clip
+        fields = [
+            'id',
+            'title',
+            'tags',
         ]

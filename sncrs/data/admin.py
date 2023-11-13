@@ -9,7 +9,7 @@ from .models import (
     Alias, Seed, Placement, Attendee, Bracket,
     VenueImage, Venue, Character, PreferredCharacter,
     Person, SmashNight, Team, Match, StageType, Stage,
-    MatchupType, Matchup, PersonSnapshot, Greeting
+    MatchupType, Matchup, PersonSnapshot, Greeting, Clip, ClipTag
 )
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
 from .sn_calculate import full_update
@@ -124,7 +124,11 @@ class VenueAdmin(admin.ModelAdmin):
     inlines = [VenueImageAdmin]
     class Meta:
         model = Venue
-
+    
+class ClipAdmin(admin.ModelAdmin):
+    filter_horizontal = ('tags', )
+    class Meta:
+        model = Clip
 
 admin.site.register(Character)
 admin.site.register(Team, TeamAdmin)
@@ -145,3 +149,5 @@ admin.site.register(PersonSnapshot)
 admin.site.register(Matchup)
 admin.site.register(VenueImage)
 admin.site.register(Venue, VenueAdmin)
+admin.site.register(ClipTag)
+admin.site.register(Clip, ClipAdmin)

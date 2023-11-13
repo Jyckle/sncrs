@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from data.models import (
     Match, PersonSnapshot, SmashNight,
-    Person, Character, Greeting, Matchup
+    Person, Character, Greeting, Matchup, Clip, ClipTag
 )
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
@@ -149,3 +149,33 @@ class MatchupSerializer(serializers.ModelSerializer):
             'total_sets',
             'total_games', 
         ]
+
+class ClipTagListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.tag
+
+    def to_internal_value(self, data):
+        return data
+
+class ClipSerializer(serializers.ModelSerializer):
+    tags = ClipTagListingField(
+        many=True,
+        queryset=ClipTag.objects.all()
+    )
+
+    class Meta:
+        model = Clip
+        fields = [
+            'id',
+            'tags',
+            'title',
+            'url',
+            ]
+        
+    def create(self, validated_data):
+        tag_data = validated_data.pop("tags")
+        clip = Clip.objects.create(**validated_data)
+        for tag in tag_data:
+            tag_object, _ = ClipTag.objects.get_or_create(tag=tag)
+            clip.tags.add(tag_object.id)
+        return clip

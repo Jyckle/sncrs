@@ -5,17 +5,17 @@ from django.db.models.functions import Lower
 from data.models import (
     Match, PersonSnapshot, Person, Team,
     StageType, SmashNight, Venue, Greeting,
-    Matchup
+    Matchup, Clip
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
-    PersonSerializer, GreetingSerializer, MatchupSerializer
+    PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
-    GreetingFilter, MatchupFilter
+    GreetingFilter, MatchupFilter, ClipFilter
 )
-from rest_framework import generics
+from rest_framework import generics, permissions
 
 
 def initialize_sn_set(request):
@@ -190,3 +190,14 @@ class MatchupList(generics.ListAPIView):
     queryset = Matchup.objects.all()
     serializer_class = MatchupSerializer
     filterset_class = MatchupFilter
+
+class ClipList(generics.ListCreateAPIView):
+    queryset = Clip.objects.all()
+    serializer_class = ClipSerializer
+    filterset_class = ClipFilter
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class ClipDeleteView(generics.RetrieveDestroyAPIView):
+    queryset = Clip.objects.all()
+    serializer_class = ClipSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
