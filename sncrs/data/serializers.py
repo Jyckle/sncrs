@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from data.models import (
     Match, PersonSnapshot, SmashNight,
-    Person, Character, Greeting, Matchup, Clip, ClipTag
+    Person, Character, Greeting, Matchup, Clip, ClipTag, Whine
 )
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
@@ -179,3 +179,15 @@ class ClipSerializer(serializers.ModelSerializer):
             tag_object, _ = ClipTag.objects.get_or_create(tag=tag)
             clip.tags.add(tag_object.id)
         return clip
+
+class WhineSerializer(serializers.ModelSerializer):
+    person = display_name_related_serializer()
+
+    class Meta:
+        model = Whine
+        fields = [
+            'id',
+            'person',
+            'text',
+            'url',
+            ]

@@ -3,7 +3,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 from data.views import (
     MatchList, SnapshotList, SmashNightList, PersonList,
-    GreetingList, MatchupList, ClipList, ClipDeleteView
+    GreetingList, MatchupList, ClipList, ClipDeleteView, WhineList
 )
 
 urlpatterns = [
@@ -15,6 +15,7 @@ urlpatterns = [
     path('matchups/', MatchupList.as_view(), name='matchups'),
     path('clips/', ClipList.as_view(), name='clips'),
     path('clip/<int:pk>/', ClipDeleteView.as_view(), name='clip'),
+    path('whines/', WhineList.as_view(), name='whines'),
     path('auth/', include('rest_framework.urls'))
 ]
 

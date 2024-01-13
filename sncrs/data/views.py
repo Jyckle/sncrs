@@ -5,15 +5,15 @@ from django.db.models.functions import Lower
 from data.models import (
     Match, PersonSnapshot, Person, Team,
     StageType, SmashNight, Venue, Greeting,
-    Matchup, Clip
+    Matchup, Clip, Whine
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
-    PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer
+    PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer, WhineSerializer
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
-    GreetingFilter, MatchupFilter, ClipFilter
+    GreetingFilter, MatchupFilter, ClipFilter, WhineFilter
 )
 from rest_framework import generics, permissions
 
@@ -201,3 +201,8 @@ class ClipDeleteView(generics.RetrieveDestroyAPIView):
     queryset = Clip.objects.all()
     serializer_class = ClipSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class WhineList(generics.ListAPIView):
+    queryset = Whine.objects.all()
+    serializer_class = WhineSerializer
+    filterset_class = WhineFilter

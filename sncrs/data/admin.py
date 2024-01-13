@@ -9,7 +9,7 @@ from .models import (
     Alias, Seed, Placement, Attendee, Bracket,
     VenueImage, Venue, Character, PreferredCharacter,
     Person, SmashNight, Team, Match, StageType, Stage,
-    MatchupType, Matchup, PersonSnapshot, Greeting, Clip, ClipTag
+    MatchupType, Matchup, PersonSnapshot, Greeting, Clip, ClipTag, Whine
 )
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
 from .sn_calculate import full_update
@@ -22,6 +22,9 @@ class AliasInline(admin.TabularInline):
 
 class GreetingInline(admin.TabularInline):
     model = Greeting
+
+class WhineInline(admin.TabularInline):
+    model = Whine
 
 class PreferredCharacterInline(admin.TabularInline):
     model = PreferredCharacter
@@ -139,6 +142,7 @@ admin.site.register(Match)
 admin.site.register(Attendee)
 admin.site.register(Alias)
 admin.site.register(Greeting)
+admin.site.register(Whine)
 admin.site.register(PreferredCharacter)
 admin.site.register(Seed)
 admin.site.register(Placement)
