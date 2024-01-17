@@ -235,6 +235,6 @@ class QuoteSerializer(serializers.ModelSerializer):
             tag_object, _ = QuoteTag.objects.get_or_create(tag=tag)
             quote.tags.add(tag_object.id)
         for speaker in speaker_data:
-            speaker_object, _ = QuoteSpeaker.objects.get_or_create(speaker=speaker)
+            speaker_object, _ = QuoteSpeaker.objects.get_or_create(name=speaker)
             quote.speakers.add(speaker_object.id)
         return quote
