@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from data.models import (
     Match, PersonSnapshot, SmashNight,
-    Person, Character, Greeting, Matchup, Clip, ClipTag, Whine
+    Person, Character, Greeting, Matchup, Clip, ClipTag,
+    Quote, QuoteTag, QuoteSpeaker, Whine
 )
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
@@ -192,3 +193,48 @@ class WhineSerializer(serializers.ModelSerializer):
             'text',
             'url',
             ]
+
+class QuoteTagListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.tag
+
+    def to_internal_value(self, data):
+        return data
+    
+class QuoteSpeakerListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.name
+
+    def to_internal_value(self, data):
+        return data
+
+class QuoteSerializer(serializers.ModelSerializer):
+    speakers = QuoteSpeakerListingField(
+        many=True,
+        queryset=QuoteSpeaker.objects.all()
+    )
+    tags = QuoteTagListingField(
+        many=True,
+        queryset=QuoteTag.objects.all()
+    )
+
+    class Meta:
+        model = Quote
+        fields = [
+            'id',
+            'text',
+            'speakers',
+            'tags',
+        ]
+        
+    def create(self, validated_data):
+        tag_data = validated_data.pop("tags")
+        speaker_data = validated_data.pop("speakers")
+        quote = Quote.objects.create(**validated_data)
+        for tag in tag_data:
+            tag_object, _ = QuoteTag.objects.get_or_create(tag=tag)
+            quote.tags.add(tag_object.id)
+        for speaker in speaker_data:
+            speaker_object, _ = QuoteSpeaker.objects.get_or_create(speaker=speaker)
+            quote.speakers.add(speaker_object.id)
+        return quote

@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
-    Greeting, Matchup, Clip, Whine
+    Greeting, Matchup, Clip, Quote, Whine
 )
 
 class MatchFilter(filters.FilterSet):
@@ -129,4 +129,18 @@ class WhineFilter(filters.FilterSet):
             'person',
             'name',
             'text',
+        ]
+
+class QuoteFilter(filters.FilterSet):
+    tags = filters.CharFilter(label='tags', field_name="tags__tag", lookup_expr="iexact")
+    speakers = filters.CharFilter(label='speakers', field_name="speakers__name", lookup_expr="iexact")
+    text = filters.CharFilter(label='text', lookup_expr="icontains")
+
+    class Meta:
+        model = Quote
+        fields = [
+            'id',
+            'text',
+            'speakers',
+            'tags',
         ]

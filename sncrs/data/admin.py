@@ -9,7 +9,8 @@ from .models import (
     Alias, Seed, Placement, Attendee, Bracket,
     VenueImage, Venue, Character, PreferredCharacter,
     Person, SmashNight, Team, Match, StageType, Stage,
-    MatchupType, Matchup, PersonSnapshot, Greeting, Clip, ClipTag, Whine
+    MatchupType, Matchup, PersonSnapshot, Greeting, Clip, 
+    ClipTag, QuoteTag, QuoteSpeaker, Quote, Whine
 )
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
 from .sn_calculate import full_update
@@ -134,6 +135,11 @@ class ClipAdmin(admin.ModelAdmin):
     class Meta:
         model = Clip
 
+class QuoteAdmin(admin.ModelAdmin):
+    filter_horizontal = ('tags', 'speakers')
+    class Meta:
+        model = Quote
+
 admin.site.register(Character)
 admin.site.register(Team, TeamAdmin)
 admin.site.register(Person, PersonAdmin)
@@ -156,3 +162,6 @@ admin.site.register(VenueImage)
 admin.site.register(Venue, VenueAdmin)
 admin.site.register(ClipTag)
 admin.site.register(Clip, ClipAdmin)
+admin.site.register(QuoteTag)
+admin.site.register(QuoteSpeaker)
+admin.site.register(Quote, QuoteAdmin)
