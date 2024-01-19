@@ -34,6 +34,7 @@ class PersonAdmin(admin.ModelAdmin):
         AliasInline,
         PreferredCharacterInline,
         GreetingInline,
+        WhineInline,
     ]
 
 
