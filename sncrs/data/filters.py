@@ -119,6 +119,7 @@ class ClipFilter(filters.FilterSet):
 
 class WhineFilter(filters.FilterSet):
     person = filters.CharFilter(label='person', field_name="person__display_name", lookup_expr="iexact")
+    name = filters.CharFilter(label='name', lookup_expr="iexact")
     text = filters.CharFilter(label='content', lookup_expr="icontains")
 
 
@@ -126,5 +127,6 @@ class WhineFilter(filters.FilterSet):
         model = Whine
         fields = [
             'person',
+            'name',
             'text',
         ]

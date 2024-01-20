@@ -187,6 +187,7 @@ class WhineSerializer(serializers.ModelSerializer):
         model = Whine
         fields = [
             'id',
+            'name',
             'person',
             'text',
             'url',
