@@ -360,7 +360,7 @@ class MatchQuerySet(models.QuerySet):
         return self.annotate(
             title=Concat(
                 # First, place our overall SmashNight Data
-                Value('STL SmashNight '),
+                Value('STL SN '),
                 Subquery(short_title_sq), Value(' '),
                 # Then the bracket title and round name if this is a bracket match
                 Case(
@@ -767,4 +767,12 @@ class Clip(models.Model):
 
     def __str__(self):
         return f"{self.title}: {' | '.join(self.tags.values_list('tag', flat=True))}"
+
+class Whine(models.Model):
+    text = models.TextField()
+    person = models.ForeignKey(Person, null=True, blank=True, related_name="whines", on_delete=models.DO_NOTHING)
+    url = models.URLField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.person}: {self.text}"
 
