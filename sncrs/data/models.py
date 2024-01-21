@@ -770,9 +770,10 @@ class Clip(models.Model):
 
 class Whine(models.Model):
     text = models.TextField()
+    name = models.CharField(max_length=255)
     person = models.ForeignKey(Person, null=True, blank=True, related_name="whines", on_delete=models.DO_NOTHING)
     url = models.URLField(max_length=200, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.person}: {self.text}"
+        return f"{self.name}: {self.text}"
 
