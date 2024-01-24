@@ -6,6 +6,8 @@ from data.models import (
     Quote, QuoteTag, QuoteSpeaker, Whine
 )
 
+from data.utility_functions import get_sncrs_person
+
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
     allow_null=True,
     read_only=True,
@@ -235,6 +237,15 @@ class QuoteSerializer(serializers.ModelSerializer):
             tag_object, _ = QuoteTag.objects.get_or_create(tag=tag)
             quote.tags.add(tag_object.id)
         for speaker in speaker_data:
-            speaker_object, _ = QuoteSpeaker.objects.get_or_create(name=speaker)
+            sncrs_person = get_sncrs_person(speaker)
+            if sncrs_person is None:
+                speaker_object, _ = QuoteSpeaker.objects.update_or_create(name=speaker)
+            else:
+                speaker = sncrs_person.display_name
+                speaker_object, _ = QuoteSpeaker.objects.update_or_create(
+                    person=sncrs_person,
+                    defaults=dict(
+                        name=speaker,
+                    ))
             quote.speakers.add(speaker_object.id)
         return quote
