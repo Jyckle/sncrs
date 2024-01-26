@@ -5,12 +5,12 @@ from django.db.models.functions import Lower
 from data.models import (
     Match, PersonSnapshot, Person, Team,
     StageType, SmashNight, Venue, Greeting,
-    Matchup, Clip, Quote, Whine
+    Matchup, Clip, ClipTag, Quote, QuoteTag, Whine
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
     PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer,
-    QuoteSerializer, WhineSerializer
+    ClipTagSerializer, QuoteSerializer, QuoteTagSerializer, WhineSerializer
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
@@ -198,6 +198,10 @@ class ClipList(generics.ListCreateAPIView):
     filterset_class = ClipFilter
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+class ClipTagList(generics.ListCreateAPIView):
+    queryset = ClipTag.objects.all()
+    serializer_class = ClipTagSerializer
+
 class ClipDeleteView(generics.RetrieveDestroyAPIView):
     queryset = Clip.objects.all()
     serializer_class = ClipSerializer
@@ -213,6 +217,10 @@ class QuoteList(generics.ListCreateAPIView):
     serializer_class = QuoteSerializer
     filterset_class = QuoteFilter
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class QuoteTagList(generics.ListCreateAPIView):
+    queryset = QuoteTag.objects.all()
+    serializer_class = QuoteTagSerializer
 
 class QuoteDeleteView(generics.RetrieveDestroyAPIView):
     queryset = Quote.objects.all()

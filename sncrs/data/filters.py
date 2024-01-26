@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
-    Greeting, Matchup, Clip, Quote, Whine
+    Greeting, Matchup, Clip, ClipTag, Quote, QuoteTag, Whine,
 )
 
 class MatchFilter(filters.FilterSet):

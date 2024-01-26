@@ -116,7 +116,6 @@ class PersonSerializer(serializers.ModelSerializer):
         return [obj.display_name, *list(obj.alias_set.values_list('name', flat=True))]
 
 
-
 class GreetingSerializer(serializers.ModelSerializer):
     person = display_name_related_serializer()
 
@@ -153,12 +152,21 @@ class MatchupSerializer(serializers.ModelSerializer):
             'total_games', 
         ]
 
+
 class ClipTagListingField(serializers.RelatedField):
     def to_representation(self, value):
         return value.tag
 
     def to_internal_value(self, data):
         return data
+
+
+class ClipTagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ClipTag
+        fields = ['tag']
+
 
 class ClipSerializer(serializers.ModelSerializer):
     tags = ClipTagListingField(
@@ -202,13 +210,22 @@ class QuoteTagListingField(serializers.RelatedField):
 
     def to_internal_value(self, data):
         return data
-    
+
+
+class QuoteTagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = QuoteTag
+        fields = ['tag']
+
+
 class QuoteSpeakerListingField(serializers.RelatedField):
     def to_representation(self, value):
         return value.name
 
     def to_internal_value(self, data):
         return data
+
 
 class QuoteSerializer(serializers.ModelSerializer):
     speakers = QuoteSpeakerListingField(
