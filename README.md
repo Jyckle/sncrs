@@ -86,4 +86,16 @@ If local_file_location is provided, the backup file will be placed in that locat
 The backup will be restored to the specified container (prod|dev). Note that this includes media files and all database info.
 This will clear out existing data, so be careful!
 
+### Additional Commands
+
+#### Work inside a container
+
+To work interactively inside the container, use the following:
+
+```bash
+./qs exec dev
+```
+
+This can be very useful for checking out what is going on inside one of the containers.
+
 ## Long Live SmashNights!
