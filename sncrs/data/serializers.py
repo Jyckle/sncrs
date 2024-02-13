@@ -2,9 +2,11 @@ from rest_framework import serializers
 
 from data.models import (
     Match, PersonSnapshot, SmashNight,
-    Person, Character, Greeting, Matchup, 
-    Clip, ClipTag, Whine, SocialLink, Site
+    Person, Character, Greeting, Matchup, Clip, ClipTag,
+    Quote, QuoteTag, QuoteSpeaker, Whine, SocialLink, Site
 )
+
+from data.utility_functions import get_sncrs_person
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
     allow_null=True,
@@ -127,7 +129,6 @@ class PersonSerializer(serializers.ModelSerializer):
         return [obj.display_name, *list(obj.alias_set.values_list('name', flat=True))]
 
 
-
 class GreetingSerializer(serializers.ModelSerializer):
     person = display_name_related_serializer()
 
@@ -164,12 +165,21 @@ class MatchupSerializer(serializers.ModelSerializer):
             'total_games', 
         ]
 
+
 class ClipTagListingField(serializers.RelatedField):
     def to_representation(self, value):
         return value.tag
 
     def to_internal_value(self, data):
         return data
+
+
+class ClipTagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ClipTag
+        fields = ['tag']
+
 
 class ClipSerializer(serializers.ModelSerializer):
     tags = ClipTagListingField(
@@ -206,3 +216,66 @@ class WhineSerializer(serializers.ModelSerializer):
             'text',
             'url',
             ]
+
+class QuoteTagListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.tag
+
+    def to_internal_value(self, data):
+        return data
+
+
+class QuoteTagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = QuoteTag
+        fields = ['tag']
+
+
+class QuoteSpeakerListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.name
+
+    def to_internal_value(self, data):
+        return data
+
+
+class QuoteSerializer(serializers.ModelSerializer):
+    speakers = QuoteSpeakerListingField(
+        many=True,
+        queryset=QuoteSpeaker.objects.all()
+    )
+    tags = QuoteTagListingField(
+        many=True,
+        queryset=QuoteTag.objects.all()
+    )
+
+    class Meta:
+        model = Quote
+        fields = [
+            'id',
+            'text',
+            'speakers',
+            'tags',
+        ]
+        
+    def create(self, validated_data):
+        tag_data = validated_data.pop("tags")
+        speaker_data = validated_data.pop("speakers")
+        quote = Quote.objects.create(**validated_data)
+        for tag in tag_data:
+            tag_object, _ = QuoteTag.objects.get_or_create(tag=tag)
+            quote.tags.add(tag_object.id)
+        for speaker in speaker_data:
+            sncrs_person = get_sncrs_person(speaker)
+            if sncrs_person is None:
+                speaker_object, _ = QuoteSpeaker.objects.update_or_create(name=speaker)
+            else:
+                speaker = sncrs_person.display_name
+                speaker_object, _ = QuoteSpeaker.objects.update_or_create(
+                    person=sncrs_person,
+                    defaults=dict(
+                        name=speaker,
+                    ))
+            quote.speakers.add(speaker_object.id)
+        return quote

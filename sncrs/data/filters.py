@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
-    Greeting, Matchup, Clip, Whine, SocialLink
+    Greeting, Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, SocialLink,
 )
 
 class CharInFilter(filters.BaseInFilter, filters.CharFilter):
@@ -76,7 +76,7 @@ class PersonFilter(filters.FilterSet):
     def all_names_filter(self, queryset, name, value):
         """Create a query filtering both display name and aliases on the field
         specified by field_name, for the value in value"""
-        player = value
+        player = valueSocialLink
         display_name_arg = {f'display_name__iexact': player}
         alias_arg = {f'alias__name__iexact': player}
         return queryset.filter(Q(**display_name_arg) | Q(**alias_arg)).distinct()
@@ -145,3 +145,17 @@ class SocialLinkFilter(filters.FilterSet):
             'site',
             'person',
         }
+
+class QuoteFilter(filters.FilterSet):
+    tags = filters.CharFilter(label='tags', field_name="tags__tag", lookup_expr="iexact")
+    speakers = filters.CharFilter(label='speakers', field_name="speakers__name", lookup_expr="iexact")
+    text = filters.CharFilter(label='text', lookup_expr="icontains")
+
+    class Meta:
+        model = Quote
+        fields = [
+            'id',
+            'text',
+            'speakers',
+            'tags',
+        ]

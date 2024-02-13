@@ -787,3 +787,25 @@ class SocialLink(models.Model):
     site = models.ForeignKey(Site, related_name="social_links", on_delete=models.CASCADE)
     url = models.URLField(max_length=200, null=True, blank=True)
     person = models.ForeignKey(Person, related_name="socials", on_delete=models.CASCADE)
+
+
+class QuoteTag(models.Model):
+    tag = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.tag
+    
+class QuoteSpeaker(models.Model):
+    name = models.CharField(max_length=255)
+    person = models.ForeignKey(Person, null=True, blank=True, related_name="speakers", on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return self.name
+
+class Quote(models.Model):
+    text = models.TextField()
+    tags = models.ManyToManyField(QuoteTag, related_name='quotes')
+    speakers = models.ManyToManyField(QuoteSpeaker, related_name='quotes')
+
+    def __str__(self):
+        return f"\"{self.text}\" -{' -'.join(self.speakers.values_list('name', flat=True))} ({' | '.join(self.tags.values_list('tag', flat=True))})"

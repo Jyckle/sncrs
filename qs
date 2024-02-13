@@ -3,7 +3,7 @@
 set -e
 category=$1
 # Possible categories
-container_commands=("run" "stop" "restart" "logs")
+container_commands=("run" "stop" "restart" "logs" "exec")
 
 ## Container Commands ##
 if [[ " ${container_commands[*]} " =~ " ${category} " ]]; then
@@ -39,6 +39,9 @@ if [[ " ${container_commands[*]} " =~ " ${category} " ]]; then
             ;;
         logs)
             compose_args+=("logs")
+            ;;
+        exec)
+            compose_args+=("exec" "web" "bash")
             ;;
     esac
     extra_args=${@:3}
