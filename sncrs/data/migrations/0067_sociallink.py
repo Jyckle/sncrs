@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0058_remove_person_chat_tag'),
+        ('data', '0066_quotetag_quotespeaker_quote'),
     ]
 
     operations = [

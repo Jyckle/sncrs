@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0059_sociallink'),
+        ('data', '0067_sociallink'),
     ]
 
     operations = [

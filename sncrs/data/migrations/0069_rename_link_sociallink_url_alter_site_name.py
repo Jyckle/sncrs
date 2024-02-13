@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0060_site_alter_sociallink_site'),
+        ('data', '0068_site_alter_sociallink_site'),
     ]
 
     operations = [

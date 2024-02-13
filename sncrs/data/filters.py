@@ -76,7 +76,7 @@ class PersonFilter(filters.FilterSet):
     def all_names_filter(self, queryset, name, value):
         """Create a query filtering both display name and aliases on the field
         specified by field_name, for the value in value"""
-        player = valueSocialLink
+        player = value
         display_name_arg = {f'display_name__iexact': player}
         alias_arg = {f'alias__name__iexact': player}
         return queryset.filter(Q(**display_name_arg) | Q(**alias_arg)).distinct()
