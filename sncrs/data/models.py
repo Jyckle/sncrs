@@ -357,6 +357,12 @@ class MatchQuerySet(models.QuerySet):
         short_title_sq = SmashNight.objects.filter(id=OuterRef('sn__id')).order_by().values('short_title')
         p1_main_name = PreferredCharacter.objects.filter(person__id=OuterRef('p1__id')).order_by('order').values('character__name')[:1]
         p2_main_name = PreferredCharacter.objects.filter(person__id=OuterRef('p2__id')).order_by('order').values('character__name')[:1]
+        
+        # TODO: What is the correct way to excise 'Round ' from the round_name in place?
+        # round_string = F('round_name').replace('Round ', '')
+        # round_string = self.round_name
+        # round_name.replace('Round ', '')
+
         return self.annotate(
             title=Concat(
                 # First, place our overall SmashNight Data
