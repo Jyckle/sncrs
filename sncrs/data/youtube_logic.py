@@ -6,20 +6,6 @@ import googleapiclient.errors
 
 from .models import SmashNight, Match
 
-# get the round number given the Description
-def get_round_number(description):
-    extracted_round = re.search(r'(?<=round )\d', description)
-    if extracted_round is not None:
-        round_number = 0
-    else:
-        round_number = int(extracted_round.group(0))
-
-    if 'loser' in description:
-        return -round_number
-    else:
-        return round_number
-
-
 # get all videos from a smashNight
 def get_smashnight_videos(sn):
     # Disable OAuthlib's HTTPS verification when running locally.
