@@ -326,11 +326,11 @@ class MatchQuerySet(models.QuerySet):
                     round__gt=0,
                     then=Case(
                         When(winners_index=0, then=Value("Grand Finals")),
-                        When(winners_index=1, then=Value("Winners Finals")),
-                        When(winners_index=2, then=Value("Winners Semis")),
-                        When(winners_index=3, then=Value("Winners Quarters")),
+                        When(winners_index=1, then=Value("W Finals")),
+                        When(winners_index=2, then=Value("W Semis")),
+                        When(winners_index=3, then=Value("W Quarters")),
                         default=Concat(
-                            Value("Winners Round "),
+                            Value("Winners "),
                             F('round'),
                             output_field=models.CharField()
                         )
@@ -339,11 +339,11 @@ class MatchQuerySet(models.QuerySet):
                 When(
                     round__lt=0,
                     then=Case(
-                        When(losers_index=0, then=Value("Losers Finals")),
-                        When(losers_index=1, then=Value("Losers Semis")),
-                        When(losers_index=2, then=Value("Losers Quarters")),
+                        When(losers_index=0, then=Value("L Finals")),
+                        When(losers_index=1, then=Value("L Semis")),
+                        When(losers_index=2, then=Value("L Quarters")),
                         default=Concat(
-                            Value("Losers Round "),
+                            Value("Losers "),
                             Abs(F('round')),
                             output_field=models.CharField(),
                         )
