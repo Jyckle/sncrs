@@ -3,7 +3,8 @@ from django.db.models import Q
 
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
-    Greeting, Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, SocialLink,
+    Greeting, Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, 
+    SocialLink, Lesson,
 )
 
 class CharInFilter(filters.BaseInFilter, filters.CharFilter):
@@ -158,4 +159,14 @@ class QuoteFilter(filters.FilterSet):
             'text',
             'speakers',
             'tags',
+        ]
+
+
+class LessonFilter(filters.FilterSet):
+    text = filters.CharFilter(label='content', lookup_expr="icontains")
+
+    class Meta:
+        model = Lesson
+        fields = [
+            'text',
         ]

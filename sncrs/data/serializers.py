@@ -3,7 +3,8 @@ from rest_framework import serializers
 from data.models import (
     Match, PersonSnapshot, SmashNight,
     Person, Character, Greeting, Matchup, Clip, ClipTag,
-    Quote, QuoteTag, QuoteSpeaker, Whine, SocialLink, Site
+    Quote, QuoteTag, QuoteSpeaker, Whine, SocialLink, Site,
+    Lesson
 )
 
 from data.utility_functions import get_sncrs_person
@@ -279,3 +280,14 @@ class QuoteSerializer(serializers.ModelSerializer):
                     ))
             quote.speakers.add(speaker_object.id)
         return quote
+
+
+class LessonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Lesson
+        fields = [
+            'id',
+            'text',
+            'url',
+            ]
