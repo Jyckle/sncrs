@@ -5,18 +5,19 @@ from django.db.models.functions import Lower
 from data.models import (
     Match, PersonSnapshot, Person, Team,
     StageType, SmashNight, Venue, Greeting,
-    Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, SocialLink
+    Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, 
+    SocialLink, Lesson,
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
     PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer,
     ClipTagSerializer, QuoteSerializer, QuoteTagSerializer, WhineSerializer,
-    SocialLinkSerializer,
+    SocialLinkSerializer, LessonSerializer,
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
     GreetingFilter, MatchupFilter, ClipFilter, QuoteFilter, WhineFilter,
-    SocialLinkFilter
+    SocialLinkFilter, LessonFilter,
 )
 from rest_framework import generics, permissions
 
@@ -233,3 +234,8 @@ class QuoteDeleteView(generics.RetrieveDestroyAPIView):
     queryset = Quote.objects.all()
     serializer_class = QuoteSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class LessonList(generics.ListAPIView):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    filterset_class = LessonFilter

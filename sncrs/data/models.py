@@ -809,3 +809,10 @@ class Quote(models.Model):
 
     def __str__(self):
         return f"\"{self.text}\" -{' -'.join(self.speakers.values_list('name', flat=True))} ({' | '.join(self.tags.values_list('tag', flat=True))})"
+    
+class Lesson(models.Model):
+    text = models.TextField()
+    url = models.URLField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return self.text
