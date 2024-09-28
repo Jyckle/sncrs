@@ -633,10 +633,19 @@ class MatchQuerySet(models.QuerySet):
                 Case(
                     When(
                         type=0, # Bracket Match
-                        then=Concat(
-                            F('bracket__title'),
-                            Value(' '),
-                            F('round_name'),
+                        then=Case(
+                            When(
+                                bracket__bracket_type=Bracket.Type.STANDARD,
+                                then=Concat(
+                                    F('bracket__title'),
+                                    Value(' '),
+                                    F('round_name'),
+                                )
+                            ),
+                            When(
+                                bracket__bracket_type=Bracket.Type.ROUND_ROBIN,
+                                then=F('bracket__title'),
+                            ),
                         ),
                     ), 
                     When(type=1, then=Value('Challenge Match')), # Challenge Match
@@ -666,10 +675,19 @@ class MatchQuerySet(models.QuerySet):
                 Case(
                     When(
                         type=0, # Bracket Match
-                        then=Concat(
-                            F('bracket__title'),
-                            Value(' '),
-                            F('round_name'),
+                        then=Case(
+                            When(
+                                bracket__bracket_type=Bracket.Type.STANDARD,
+                                then=Concat(
+                                    F('bracket__title'),
+                                    Value(' '),
+                                    F('round_name'),
+                                )
+                            ),
+                            When(
+                                bracket__bracket_type=Bracket.Type.ROUND_ROBIN,
+                                then=F('bracket__title'),
+                            ),
                         ),
                     ), 
                     When(type=1, then=Value('Challenge Match')), # Challenge Match
