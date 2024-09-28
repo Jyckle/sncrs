@@ -8,7 +8,7 @@ import challonge
 import os
 from typing import Tuple
 from collections import defaultdict
-from itertools import groupby
+from itertools import groupby, combinations
 
 # Create your models here.
 class Character(models.Model):
@@ -76,6 +76,13 @@ class PersonQuerySet(models.QuerySet):
             if person.is_name(text):
                 return person
         return None
+    
+    def set_demons(self):
+        """Set bracket demons for the provided group of people"""
+        for person in self:
+            person.bracket_demon = Person.objects.get(display_name=person.demons[0])
+            person.save()
+    
 
 
 class PersonManager(models.Manager.from_queryset(PersonQuerySet)):
@@ -135,6 +142,10 @@ class Person(models.Model):
     @property
     def rivals(self):
         return self.px_matchup_set.order_by('-rival_score').values_list('py__display_name', flat=True)
+
+    @property
+    def demons(self):
+        return self.px_matchup_set.order_by('-demon_score').values_list('py__display_name', flat=True)
 
     def get_names(self):
         """
@@ -688,7 +699,9 @@ class MatchQuerySet(models.QuerySet):
         int, int
             px's total game wins, py's total game wins
         """
-        aggregated_vals = self.aggregate(
+        aggregated_vals = self.filter(
+            p1__in=[px, py], p2__in=[px, py]
+        ).aggregate(
             px_wins=Sum(
                 Case(
                     When(p1=px, p2=py, then=F('p1_wins')),
@@ -712,6 +725,7 @@ class MatchQuerySet(models.QuerySet):
     def get_player_set_wins(self, px: Person, py: Person) -> tuple[int, int]:
         """
         Return the total set wins from all matches between these two people
+        Should only be used after setting winner and loser annotations
 
         Parameters
         ----------
@@ -723,11 +737,11 @@ class MatchQuerySet(models.QuerySet):
         int, int
             px's total set wins, py's total set wins
         """
-        aggregated_vals = self.aggregate(
-            px_wins=Count('pk', filter=Q(p1=px, p2=py, p1_wins__gt=F('p2_wins'))) 
-            + Count('pk', filter=Q(p1=py, p2=px, p2_wins__gt=F('p1_wins'))),
-            py_wins=Count('pk', filter=Q(p1=py, p2=px, p1_wins__gt=F('p2_wins')))
-            + Count('pk', filter=Q(p1=px, p2=py, p2_wins__gt=F('p1_wins'))),
+        aggregated_vals = self.filter(
+            p1__in=[px, py], p2__in=[px, py]
+        ).aggregate(
+            px_wins=Count('pk', filter=Q(winner=px.pk, loser=py.pk)),
+            py_wins=Count('pk', filter=Q(winner=py.pk, loser=px.pk)),
         )
         return (
             aggregated_vals['px_wins'],
@@ -919,12 +933,37 @@ class Stage(models.Model):
     class Meta:
         ordering = ["name"]
 
+class MatchupTypeQuerySet(models.QuerySet):
+    """
+    A class for operations on a set of :class:`MatchupType` objects.
+
+    If there are methods that operate on a per-matchupType basis, they should
+    not be included here.
+    """
+
+    def get_type_by_percent(self, win_percent: float):
+        """
+        Get the MatchupType by the win percent
+
+        Parameters
+        ----------
+        win_percent: float
+            The win percent to fetch a MatchupType for
+
+        Returns
+        -------
+        MatchupType
+            The MatchupType object matching the win_percent
+
+        """
+        return self.get(lower_bound__lte=win_percent, upper_bound__gt=win_percent)
 
 class MatchupType(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     lower_bound = models.DecimalField(max_digits=10, decimal_places=2)
     upper_bound = models.DecimalField(max_digits=10, decimal_places=2)
     color = models.CharField(max_length=7, default="#FFFFFF")
+    objects = MatchupTypeQuerySet.as_manager()
 
     def __str__(self):
         return self.name
@@ -955,6 +994,51 @@ class MatchupQuerySet(models.QuerySet):
     If there are methods that operate on a per-matchup basis, they should
     not be included here.
     """
+
+    def safe_get_matchup(self, px: Person, py: Person):
+        """
+        Get the matchup based on two people in a safe manner. If it does not exist,
+        return None, else, return the matchup.
+
+        Parameters
+        ----------
+        px, py: Person
+
+        Returns
+        -------
+        matchup: Matchup
+            The found matchup, or None
+        """
+        try:
+            c_matchup = self.get(px=px, py=py)
+            return c_matchup
+        except Matchup.MultipleObjectsReturned:
+            print(f"Error: Multiple matchups found between {px.display_name} and {py.display_name}")
+        except Matchup.DoesNotExist:
+            pass
+        return None
+
+    def safe_get_matchup_wins(self, px: Person, py: Person) -> tuple[int, int]:
+        """
+        Check if there are any exceptions with a specific matchup and return total wins if not
+
+        Parameters
+        ----------
+        px, py: Person
+            The people to find a matchup for
+
+        Returns
+        -------
+        int, int
+            px_total_wins, py_total_wins, or None, None
+        """
+        c_matchup = self.safe_get_matchup(px, py)
+        if not c_matchup:
+            return None, None
+        px_total_wins, py_total_wins = c_matchup.get_total_wins()
+        if px_total_wins == 0 and py_total_wins == 0:
+            return None, None
+        return px_total_wins, py_total_wins
 
     def set_total_game_wins_annotation(self) -> models.QuerySet:
         """
@@ -1019,13 +1103,122 @@ class MatchupQuerySet(models.QuerySet):
         )
         return annotated
 
+    def set_demon_score_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the demon score
+        This score indicates the status of person y as a demon to person x
+        with higher values indicating person y is more likely to be the demon for person x
+        """
+        total_wins_annotated = self.set_total_game_wins_annotation()
+        annotated = total_wins_annotated.annotate(
+            demon_score=Cast(
+                Coalesce(
+                    Case(
+                        When(px_total_game_wins=0.0, py_total_game_wins=0.0, then=-1000.0),
+                        When(px_total_game_wins__lt=F('py_total_game_wins'),
+                             then=(F('py_total_game_wins') - F('px_total_game_wins') / 10.0)),
+                        default=F('py_total_game_wins') * 25.0 - F('px_total_game_wins') * 13.0
+                    ),
+                    -1000.0
+                ),
+                output_field=models.FloatField())
+        )
+        return annotated
+
+    def set_rank_difference_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the rank difference between the two players
+        """
+        annotated = self.annotate(rank_difference=Abs(F('px__rank') - F('py__rank')))
+        return annotated
+
+    def set_game_win_percent_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the game win percent of px
+        """
+        total_wins_annotated = self.set_total_game_wins_annotation()
+        total_games_annotated = total_wins_annotated.set_total_games_annotation()
+        annotated = total_games_annotated.annotate(
+            game_win_percent=Case(
+                When(total_games__lt=2, then=-5.0),
+                default=(
+                    (F('px_total_game_wins') * 1.0) / (F('total_games') * 1.0)
+                ) * 100.0
+            )
+        )
+        return annotated
+
+    def set_set_win_percent_annotation(self) -> models.QuerySet:
+        """
+        Annotate matchups with the set win percent of px
+        """
+        total_set_wins_annotated = self.set_total_set_wins_annotation()
+        total_sets_annotated = total_set_wins_annotated.set_total_sets_annotation()
+        annotated = total_sets_annotated.annotate(
+            set_win_percent=Case(
+                When(total_sets__lt=2, then=-5.0),
+                default=(
+                    (F('px_total_set_wins') * 1.0) / (F('total_sets') * 1.0)
+                ) * 100.0
+            )
+        )
+        return annotated
+
+    def set_matchup_types(self):
+        """
+        Set the game and set matchup type for each matchup
+        """
+        for matchup in self:
+            matchup.matchup_type = MatchupType.objects.get_type_by_percent(matchup.game_win_percent)
+            matchup.set_matchup_type = MatchupType.objects.get_type_by_percent(matchup.set_win_percent)
+            matchup.save()
+
+    def create_or_update_matchups_table(self, person_list: models.QuerySet = None) -> None:
+        """
+        Create or update the full matchups table with the given person_list
+        During this process, do not overwrite additional_wins, as that is a manually entered value
+
+        Parameters
+        ----------
+        person_list: models.QuerySet
+            The list of people to generate the matchup table for. If not provided, defaults to all people
+        """
+        person_list = person_list or Person.objects.all()
+        match_queryset = Match.objects
+        for person_x, person_y in combinations(person_list, 2):
+            px_wins, py_wins = match_queryset.get_player_game_wins(person_x, person_y)
+            px_set_wins, py_set_wins = match_queryset.get_player_set_wins(person_x, person_y)
+            self.update_or_create(
+                px=person_x,
+                py=person_y,
+                defaults=dict(
+                    px_wins=px_wins,
+                    py_wins=py_wins,
+                    px_set_wins=px_set_wins,
+                    py_set_wins=py_set_wins,
+                )
+            )
+            self.update_or_create(
+                py=person_x,
+                px=person_y,
+                defaults=dict(
+                    py_wins=px_wins,
+                    px_wins=py_wins,
+                    py_set_wins=px_set_wins,
+                    px_set_wins=py_set_wins,
+                )
+            )
+        self.set_matchup_types()
+
 class MatchupManager(models.Manager.from_queryset(MatchupQuerySet)):
 
     def get_queryset(self):
         return super(MatchupManager, self).get_queryset()\
-            .set_total_sets_annotation()\
-            .set_total_games_annotation()\
-            .set_rival_score_annotation()
+            .set_rival_score_annotation()\
+            .set_demon_score_annotation()\
+            .set_rank_difference_annotation()\
+            .set_game_win_percent_annotation()\
+            .set_set_win_percent_annotation()
 
 class Matchup(models.Model):
     px = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, related_name='px_matchup_set')
@@ -1052,6 +1245,16 @@ class Matchup(models.Model):
 
     class Meta:
         ordering = ["py__display_name"]
+    
+    def get_total_wins(self) -> tuple[int, int]:
+        """
+        Get the total wins for each person in the matchup
+
+        Returns
+        -------
+        px_total_wins: int, py_total_wins: int
+        """
+        return self.px_wins + self.px_additional_wins, self.py_wins + self.py_additional_wins
 
 
 class Venue(models.Model):

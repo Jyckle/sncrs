@@ -1,9 +1,8 @@
 # sn_calculate.py
 
 from .utility_functions import update_all_scores
-from .matchup_logic import create_matchup_table
 from .snapshot_logic import store_previous_snapshot_or_current_scores
-from .opponent_logic import set_all_demons
+from .models import Matchup, Person
 
 
 def set_challonge_data(sn):
@@ -19,7 +18,7 @@ def set_challonge_data(sn):
 
 def set_sncrs_data(sn):
     # create or update the matchup table
-    create_matchup_table()
+    Matchup.objects.create_or_update_matchups_table()
     # Create all the attendee rankings for this smashNight and record initial scores
     sn.create_all_attendee_ranks()
     # update attendee scores
@@ -43,4 +42,4 @@ def full_update(sn):
     store_previous_snapshot_or_current_scores(sn, "end")
 
     # set everyone's demon as calculated by the new data
-    set_all_demons()
+    Person.objects.filter(tag=Person.MEMBER).set_demons()

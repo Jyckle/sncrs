@@ -20,7 +20,7 @@ def store_previous_snapshot_or_current_scores(c_sn, score_type):
                 previous = PersonSnapshot.objects.get(person=c_person, sn=previous_sn_in_season)
                 c_person.score=previous.end_score
                 c_person.save()
-            except PersonSnasphot.DoesNotExist:
+            except PersonSnapshot.DoesNotExist:
                 pass
         # Reload to get the new scores
         people = Person.objects.all().filter(tag=Person.MEMBER)
