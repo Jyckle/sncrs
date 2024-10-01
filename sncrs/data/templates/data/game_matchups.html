@@ -20,7 +20,7 @@
               {% with matchup=person|get_matchup:person_y %}
               {% if matchup == None %}
                 <td style="background-color:#333333; color:white;">
-              {% elif matchup.px_wins|add:matchup.px_additional_wins != 0 or matchup.py_wins|add:matchup.py_additional_wins != 0 %}
+              {% elif matchup.px_wins|add:matchup.px_additional_wins or matchup.py_wins|add:matchup.py_additional_wins %}
                 <td style="background-color:{{matchup.matchup_type.color}}; color:white;">
                 {{matchup.px_wins|add:matchup.px_additional_wins}}:{{matchup.py_wins|add:matchup.py_additional_wins}}
               {% elif matchup.px == matchup.py %}

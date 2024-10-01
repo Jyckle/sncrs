@@ -1,5 +1,4 @@
 from django import template
-from ..utility_functions import get_placement_score_change
 from ..models import Person
 
 register = template.Library()
@@ -50,7 +49,7 @@ def check_attendee_score(c_sn, c_person):
     if attendee == None:
         return "--"
     else:
-        return round(get_placement_score_change(attendee, headcount),2)
+        return round(attendee.get_placement_score_change(),2)
 
 @register.filter
 def check_person_rank(c_sn, c_person):
