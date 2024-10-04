@@ -1,4 +1,5 @@
 from django import template
+from django.db.models import Q
 from ..models import Person
 
 register = template.Library()
@@ -102,9 +103,5 @@ def get_matchup(person_x, person_y):
 
 @register.filter
 def get_smashnights(person, sns_to_include):
-    sn_set = []
-    attendee_set = person.attendee_set.filter(sn__in=sns_to_include)
-    for attendee in attendee_set:
-        if attendee.sn not in sn_set:
-            sn_set.append(attendee.sn)
+    sn_set = sns_to_include.filter(Q(match__p1=person) | Q(match__p2=person)).distinct()
     return sn_set
