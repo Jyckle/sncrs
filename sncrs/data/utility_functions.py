@@ -4,6 +4,7 @@ import challonge
 from .models import Person, Matchup
 # import pandas
 import os
+from django.db.models import Q, Sum
 
 
 # calculate ranks given scores
@@ -30,16 +31,18 @@ def assign_score_based_ranks(person_list):
 
 # update everyone's scores based on if they are an attendee or not
 def update_all_scores(sn):
-    people = Person.objects.filter(tag=Person.MEMBER)
-    for c_person in people:
-        try:
-            attendee = sn.attendee_set.get(person=c_person)
-        except Exception:
-            attendee = None
-
-        if attendee is not None:
-            c_person.score = attendee.end_score
-            c_person.save()
+    attendees = Person.objects.filter(attendee__sn=sn).distinct()
+    non_attendee_scorers = Person.objects.exclude(pk__in=attendees).filter(Q(p1_match_set__sn=sn) | Q(p2_match_set__sn=sn)).distinct()
+    for c_person in attendees:
+        c_person.score = c_person.attendee_set.get(sn=sn).end_score
+        c_person.save()
+    for c_person in non_attendee_scorers:
+        c_person.score = (
+            c_person.score
+            + c_person.p1_match_set.filter(sn=sn).aggregate(Sum('p1_score_change', default=0))['p1_score_change__sum']
+            + c_person.p2_match_set.filter(sn=sn).aggregate(Sum('p2_score_change', default=0))['p2_score_change__sum']
+        )
+        c_person.save()
     return
 
 
