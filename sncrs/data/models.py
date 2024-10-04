@@ -880,9 +880,9 @@ class Match(models.Model):
             self.p2_score_change = 0
         elif self.p1_wins > self.p2_wins:
             self.p1_score_change = 5 * (1 - 1 / (1 + 5.0 ** ((float(self.p2_score) - float(self.p1_score)) / 80)))
-            self.p2_score_change = -3 * (1 / (1 + 10.0 ** ((float(self.p2_score) - float(self.p1_score)) / 80)))
+            self.p2_score_change = -3 * (1 / (1 + 10.0 ** ((float(self.p1_score) - float(self.p2_score)) / 80)))
         else:
-            self.p1_score_change = -3 * (1 / (1 + 10.0 ** ((float(self.p1_score) - float(self.p2_score)) / 80)))
+            self.p1_score_change = -3 * (1 / (1 + 10.0 ** ((float(self.p2_score) - float(self.p1_score)) / 80)))
             self.p2_score_change = 5 * (1 - 1 / (1 + 5.0 ** ((float(self.p1_score) - float(self.p2_score)) / 80)))
         self.save()
 
