@@ -487,7 +487,8 @@ class Bracket(models.Model):
             rankings[final_match.winner] = place
             place += 1
         if final_match.loser not in rankings:
-            rankings[final_match.loser] = place    
+            rankings[final_match.loser] = place
+            place += 1
         # for the rest of the matches, work down the losers bracket,
         # adding new people at the same seed
         for match in matches:
@@ -503,9 +504,9 @@ class Bracket(models.Model):
                 place += len(round_losers)
                 round_losers = []
             # add any new participants
-            if match.winner not in round_winners:
+            if match.winner not in rankings:
                 round_winners.append(match.winner)
-            if match.loswer not in round_losers:
+            if match.loser not in rankings:
                 round_losers.append(match.loser)
         return rankings
     
@@ -560,6 +561,10 @@ class Placement(models.Model):
         This makes it much easier to calculate overall placement
         """
         self.placement_score = self.bracket.rank * 100_000 + self.place
+        if (
+            update_fields := kwargs.get("update_fields")
+        ) is not None and "place" in update_fields:
+            kwargs["update_fields"] = {"placement_score"}.union(update_fields)
         super().save(*args, **kwargs)
 
 class MatchQuerySet(models.QuerySet):
