@@ -15,4 +15,5 @@ urlpatterns = [
     path('venues/', venues_view, name='venues'),
     path('frame_data/', frame_data_view, name='frame_data'),
     path('calendar/', calendar_view, name='calendar'),
+    path('hotkeys/<str:hotkey_type>/', hotkeys_view, name='hotkeys'),
 ]

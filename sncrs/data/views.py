@@ -164,6 +164,13 @@ def about_view(request, *args, **kwargs):
 def calendar_view(request, *args, **kwargs):
     return render(request, "data/calendar.html", {})
 
+def hotkeys_view(request, hotkey_type: str, *args, **kwargs):
+    context = {
+        "hotkey_path": f"data/hotkeys/{hotkey_type}.png",
+        "hotkey_type": hotkey_type
+    }
+    return render(request, "data/hotkeys.html", context)
+
 
 class MatchList(generics.ListAPIView):
     queryset = Match.objects.all()
@@ -205,7 +212,7 @@ class ClipTagList(generics.ListCreateAPIView):
     queryset = ClipTag.objects.all()
     serializer_class = ClipTagSerializer
 
-class ClipDeleteView(generics.RetrieveDestroyAPIView):
+class ClipDeleteEditView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Clip.objects.all()
     serializer_class = ClipSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
