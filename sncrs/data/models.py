@@ -1207,7 +1207,8 @@ class MatchupQuerySet(models.QuerySet):
             The list of people to generate the matchup table for. If not provided, defaults to all people
         """
         person_list = person_list or Person.objects.all()
-        match_queryset = Match.objects
+        # Don't use matches that were a forfeit (someone has a negative score)
+        match_queryset = Match.objects.filter(p1_wins__gte=0, p2_wins__gte=0)
         for person_x, person_y in combinations(person_list, 2):
             px_wins, py_wins = match_queryset.get_player_game_wins(person_x, person_y)
             px_set_wins, py_set_wins = match_queryset.get_player_set_wins(person_x, person_y)
