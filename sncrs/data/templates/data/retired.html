@@ -1,14 +1,14 @@
-<table class="table table-bordered border-dark bg-dark text-light text-center table-responsive">
+<table class="table table-borderless border-dark bg-transparent text-light text-center table-responsive">
   <thead>
     <tr>
-      <th colspan="2" style="background-color:black" scope="col"> Retired Members </th>
+      <th colspan="3" style="background-color:black" scope="col"> Retired Members </th>
     <tr>
   </thead>
   <tbody>
     {% load extra_filters %}
     {% for team in team_list %}
     <td style="padding:1px">
-      <table class="table table-bordered border-dark bg-dark text-light table-hover text-center">
+      <table class="table table-bordered border-dark bg-transparent text-light table-hover text-center">
           <tbody>
             {% for member in team.person_set|retired_filter %}
                 <tr>
