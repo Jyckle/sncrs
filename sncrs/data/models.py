@@ -1370,3 +1370,14 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.text
+
+class TwitchToken(models.Model):
+    """Store Twitch Oauth Tokens"""
+
+    user_id = models.CharField(max_length=40)
+    token = models.CharField(max_length=255)
+    refresh = models.CharField(max_length=255)
+    nickname = models.CharField(max_length=40, default="Unknown User")
+
+    def __str__(self):
+        return self.nickname
