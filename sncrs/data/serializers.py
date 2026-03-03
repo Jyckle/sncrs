@@ -4,7 +4,7 @@ from data.models import (
     Match, PersonSnapshot, SmashNight,
     Person, Character, Greeting, Matchup, Clip, ClipTag,
     Quote, QuoteTag, QuoteSpeaker, Whine, SocialLink, Site,
-    Lesson
+    Lesson, TwitchToken
 )
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
@@ -289,3 +289,21 @@ class LessonSerializer(serializers.ModelSerializer):
             'text',
             'url',
             ]
+        
+
+class TwitchTokenSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = TwitchToken
+        fields = [
+            'user_id',
+            'token',
+            'refresh',
+        ]
+    
+
+    def create(self, validated_data):
+        token, created = TwitchToken.objects.update_or_create(
+            user_id=validated_data.get('user_id'),
+            defaults={'token': validated_data.get('token'), 'refresh': validated_data.get('refresh')})
+        return token

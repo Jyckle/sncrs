@@ -11,7 +11,7 @@ from .models import (
     Person, SmashNight, Team, Match, StageType, Stage,
     MatchupType, Matchup, PersonSnapshot, Greeting, Clip, 
     ClipTag, QuoteTag, QuoteSpeaker, Quote, Whine, SocialLink, Site,
-    Lesson,
+    Lesson, TwitchToken,
 )
 
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
@@ -174,3 +174,4 @@ admin.site.register(QuoteTag)
 admin.site.register(QuoteSpeaker)
 admin.site.register(Quote, QuoteAdmin)
 admin.site.register(Lesson)
+admin.site.register(TwitchToken)

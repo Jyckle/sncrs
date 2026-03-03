@@ -6,13 +6,13 @@ from data.models import (
     Match, PersonSnapshot, Person, Team,
     StageType, SmashNight, Venue, Greeting,
     Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, 
-    SocialLink, Lesson,
+    SocialLink, Lesson, TwitchToken,
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
     PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer,
     ClipTagSerializer, QuoteSerializer, QuoteTagSerializer, WhineSerializer,
-    SocialLinkSerializer, LessonSerializer,
+    SocialLinkSerializer, LessonSerializer, TwitchTokenSerializer
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
@@ -246,3 +246,8 @@ class LessonList(generics.ListAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     filterset_class = LessonFilter
+
+class TwitchTokenList(generics.ListCreateAPIView):
+    queryset = TwitchToken.objects.all()
+    serializer_class = TwitchTokenSerializer
+    permission_classes = [permissions.IsAuthenticated]
