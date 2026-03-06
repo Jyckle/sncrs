@@ -11,10 +11,24 @@ from collections import defaultdict
 from itertools import groupby, combinations
 
 # Create your models here.
+class GameTitle(models.Model):
+    
+    SSBU = 0
+    ROA2 = 1
+    TITLE_CHOICES = [
+        (SSBU, "SSBU"),
+        (ROA2, "RoA2")
+    ]
+    title = models.IntegerField(choices=TITLE_CHOICES, default=SSBU)
+
+    def __str__(self):
+        return str(self.title)
+
 class Character(models.Model):
     name = models.CharField(max_length=100)
     image_url = models.URLField(max_length=200, null=True, blank=True)
     character_id = models.IntegerField(null=True, blank=True)
+    game_title = models.ForeignKey(GameTitle, on_delete=models.CASCADE)
     @property
     def static_image_name(self):
         return "data/characters/" + re.sub(r'[\W]+', '', re.sub('[\W ]+', '_', self.name.lower())) + ".webp"
@@ -381,6 +395,7 @@ class Bracket(models.Model):
     rank = models.IntegerField()
     url = models.URLField(max_length=200, null=True, blank=True)
     bracket_type = models.CharField(max_length=3, choices=Type, default=Type.STANDARD)
+    game_title = models.ForeignKey(GameTitle, on_delete=models.CASCADE)
 
     def __str__(self):
         return "{}: Bracket {}, {}".format(self.sn, self.rank, self.title)
