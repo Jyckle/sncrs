@@ -112,11 +112,13 @@ class Person(models.Model):
     MEMBER = 0
     GUEST = 1
     RETIRED = 2
-    OTHER = 3
+    VIEWER = 3
+    OTHER = 4
     TAG_CHOICES = [
         (MEMBER, "Member"),
         (GUEST, "Guest"),
         (RETIRED, "Retired"),
+        (VIEWER, "Viewer"),
         (OTHER, "Other")
     ]
     tag = models.IntegerField(null=True, blank=True, choices=TAG_CHOICES)
