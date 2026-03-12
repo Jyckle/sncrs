@@ -100,6 +100,7 @@ if [ $category == "backup" ]; then
         tar xzf $WORK_DIR/restore.tar.gz -C $WORK_DIR
         # Extra slashes in the two lines below are to prevent
         # Git Bash from expanding to windows paths
+        docker exec $sncrs_web_container mkdir -p //sncrs/media
         docker cp $WORK_DIR/backup/media/. $sncrs_web_container://sncrs/media
         docker exec $sncrs_web_container chown -R www-data:www-data //sncrs/media
         cat $WORK_DIR/backup/sncrs-db.sql | docker exec -i $sncrs_postgres_container psql -U $POSTGRES_USER -d postgres
