@@ -4,7 +4,7 @@ from django.db.models import Q
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
     Greeting, Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, 
-    SocialLink, Lesson,
+    SocialLink, Lesson, GameTitle
 )
 
 class CharInFilter(filters.BaseInFilter, filters.CharFilter):
@@ -169,4 +169,13 @@ class LessonFilter(filters.FilterSet):
         model = Lesson
         fields = [
             'text',
+        ]
+
+class GameTitleFilter(filters.FilterSet):
+    name = filters.CharFilter(label='title', field_name='name', lookup_expr="iexact" )
+    
+    class Meta:
+        model = GameTitle
+        fields = [
+            'name',
         ]

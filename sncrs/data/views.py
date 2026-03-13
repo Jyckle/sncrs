@@ -6,18 +6,19 @@ from data.models import (
     Match, PersonSnapshot, Person, Team,
     StageType, SmashNight, Venue, Greeting,
     Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, 
-    SocialLink, Lesson, TwitchToken,
+    SocialLink, Lesson, TwitchToken, GameTitle,
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
     PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer,
     ClipTagSerializer, QuoteSerializer, QuoteTagSerializer, WhineSerializer,
-    SocialLinkSerializer, LessonSerializer, TwitchTokenSerializer
+    SocialLinkSerializer, LessonSerializer, TwitchTokenSerializer,
+    GameTitleSerializer,
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
     GreetingFilter, MatchupFilter, ClipFilter, QuoteFilter, WhineFilter,
-    SocialLinkFilter, LessonFilter,
+    SocialLinkFilter, LessonFilter, GameTitleFilter, 
 )
 from rest_framework import generics, permissions
 
@@ -251,3 +252,8 @@ class TwitchTokenList(generics.ListCreateAPIView):
     queryset = TwitchToken.objects.all()
     serializer_class = TwitchTokenSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class GameTitleList(generics.ListAPIView):
+    queryset = GameTitle.objects.all()
+    serializer_class = GameTitleSerializer
+    filterset_class = GameTitleFilter
