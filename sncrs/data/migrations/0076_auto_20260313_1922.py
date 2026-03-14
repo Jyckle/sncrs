@@ -5,19 +5,10 @@ from django.db import migrations
 
 def create_game_titles(apps, schema_editor):
     GameTitle = apps.get_model("data", "GameTitle")
-    title_list = [
-        GameTitle(name="SSBU"),
-        GameTitle(name="RoA2"),
-    ]
-
-    for item in title_list:
+    for name in ["SSBU", "RoA2"]:
         GameTitle.objects.get_or_create(
-            name=item.name,
-            defaults={
-                "name": item.name
-            }
+            name=name,
         )
-
 
 class Migration(migrations.Migration):
 

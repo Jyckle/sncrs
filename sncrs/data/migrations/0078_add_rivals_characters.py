@@ -21,12 +21,15 @@ def create_initial_characters(apps, schema_editor):
         Character(name='Orcane', character_id=96, image_url='https://static.wikitide.net/dragdownwiki/thumb/d/d9/RoA2_Orcane_Portrait.png/1024px-RoA2_Orcane_Portrait.png'),
         Character(name='Etalus', character_id=97, image_url='https://static.wikitide.net/dragdownwiki/thumb/1/18/RoA2_Etalus_Portrait.png/1024px-RoA2_Etalus_Portrait.png'),
     ]
+    GameTitle = apps.get_model("data", "GameTitle")
+    rivals = GameTitle.objects.get(name="RoA2")
     for item in full_character_list:
         Character.objects.get_or_create(
             name=item.name,
             defaults={
                 "character_id": item.character_id,
                 "image_url": item.image_url,
+                "game_title_id": rivals.pk
             }
         )
 

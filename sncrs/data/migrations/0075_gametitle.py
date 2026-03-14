@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
             name='GameTitle',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default='SSBU', max_length=10)),
+                ('name', models.CharField(default='SSBU', max_length=10, unique=True)),
+                ('description', models.TextField(null=True, blank=True))
             ],
         ),
     ]

@@ -12,13 +12,15 @@ from itertools import groupby, combinations
 
 # Create your models here.
 class GameTitle(models.Model):
-    name = models.CharField(max_length=10, default="SSBU")
+    name = models.CharField(max_length=10, default="SSBU", unique=True)
+    description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return str(self.name)
     
 def get_default_game_title():
-    return GameTitle.objects.get_or_create(name="SSBU")[0].pk
+    game, created = GameTitle.objects.get_or_create(name="SSBU")
+    return game.pk
 
 
 class Character(models.Model):
