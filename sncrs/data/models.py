@@ -11,10 +11,23 @@ from collections import defaultdict
 from itertools import groupby, combinations
 
 # Create your models here.
+class GameTitle(models.Model):
+    name = models.CharField(max_length=10, default="SSBU", unique=True)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return str(self.name)
+    
+def get_default_game_title():
+    game, created = GameTitle.objects.get_or_create(name="SSBU")
+    return game.pk
+
+
 class Character(models.Model):
     name = models.CharField(max_length=100)
     image_url = models.URLField(max_length=200, null=True, blank=True)
     character_id = models.IntegerField(null=True, blank=True)
+    game_title = models.ForeignKey(GameTitle, on_delete=models.SET_DEFAULT, default=get_default_game_title)
     @property
     def static_image_name(self):
         return "data/characters/" + re.sub(r'[\W]+', '', re.sub('[\W ]+', '_', self.name.lower())) + ".webp"
@@ -381,6 +394,7 @@ class Bracket(models.Model):
     rank = models.IntegerField()
     url = models.URLField(max_length=200, null=True, blank=True)
     bracket_type = models.CharField(max_length=3, choices=Type, default=Type.STANDARD)
+    game_title = models.ForeignKey(GameTitle, on_delete=models.SET_DEFAULT, default=get_default_game_title)
 
     def __str__(self):
         return "{}: Bracket {}, {}".format(self.sn, self.rank, self.title)
@@ -429,6 +443,7 @@ class Bracket(models.Model):
                         round=match["round"],
                         sn=self.sn,
                         bracket=self,
+                        # game_title = self.game_title
                     )
                 )
                 if created:
@@ -849,6 +864,7 @@ class Match(models.Model):
     p2_score_change = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     sn = models.ForeignKey(SmashNight, on_delete=models.SET_NULL, null=True, blank=True)
     bracket = models.ForeignKey(Bracket, on_delete=models.SET_NULL, null=True, blank=True)
+    # TODO: game_title = HOW TO SET IT TO THE BRACKET'S GAME TITLE 
     challonge_id = models.IntegerField(null=True, blank=True)
     match_url = models.URLField(max_length=200, null=True, blank=True)
     round = models.IntegerField(null=True, blank=True)

@@ -11,7 +11,7 @@ from .models import (
     Person, SmashNight, Team, Match, StageType, Stage,
     MatchupType, Matchup, PersonSnapshot, Greeting, Clip, 
     ClipTag, QuoteTag, QuoteSpeaker, Quote, Whine, SocialLink, Site,
-    Lesson, TwitchToken,
+    Lesson, TwitchToken, GameTitle,
 )
 
 from .forms import TeamForm, StageTypeForm, MatchupTypeForm
@@ -20,6 +20,7 @@ from .youtube_logic import set_videos
 # Register your models here.
 
 
+# Define Inlines
 class AliasInline(admin.TabularInline):
     model = Alias
 
@@ -35,6 +36,23 @@ class SocialLinkInLine(admin.TabularInline):
 class PreferredCharacterInline(admin.TabularInline):
     model = PreferredCharacter
 
+class SeedInline(admin.TabularInline):
+    model = Seed
+
+class PlacementInline(admin.TabularInline):
+    model = Placement
+
+class GameTitleInline(admin.TabularInline):
+    model = GameTitle
+
+class AttendeeInline(admin.StackedInline):
+    model = Attendee
+
+class BracketInline(admin.TabularInline):
+    model = Bracket
+
+
+# Define Admins
 class PersonAdmin(admin.ModelAdmin):
     inlines = [
         AliasInline,
@@ -44,29 +62,11 @@ class PersonAdmin(admin.ModelAdmin):
         SocialLinkInLine,
     ]
 
-
-class SeedInline(admin.TabularInline):
-    model = Seed
-
-
-class PlacementInline(admin.TabularInline):
-    model = Placement
-
-
 class BracketAdmin(admin.ModelAdmin):
     inlines = [
         SeedInline,
-        PlacementInline
+        PlacementInline,
     ]
-
-
-class AttendeeInline(admin.StackedInline):
-    model = Attendee
-
-
-class BracketInline(admin.TabularInline):
-    model = Bracket
-
 
 class SmashNightAdmin(admin.ModelAdmin):
     inlines = [
@@ -175,3 +175,4 @@ admin.site.register(QuoteSpeaker)
 admin.site.register(Quote, QuoteAdmin)
 admin.site.register(Lesson)
 admin.site.register(TwitchToken)
+admin.site.register(GameTitle)

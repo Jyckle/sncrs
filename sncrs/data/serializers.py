@@ -4,7 +4,7 @@ from data.models import (
     Match, PersonSnapshot, SmashNight,
     Person, Character, Greeting, Matchup, Clip, ClipTag,
     Quote, QuoteTag, QuoteSpeaker, Whine, SocialLink, Site,
-    Lesson, TwitchToken
+    Lesson, TwitchToken, GameTitle,
 )
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
@@ -307,3 +307,11 @@ class TwitchTokenSerializer(serializers.ModelSerializer):
             user_id=validated_data.get('user_id'),
             defaults={'token': validated_data.get('token'), 'refresh': validated_data.get('refresh')})
         return token
+    
+class GameTitleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GameTitle
+        fields = [
+            'name',
+        ]
