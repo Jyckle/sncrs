@@ -3,6 +3,7 @@ venv/
 
 sncrs/static/
 sncrs/media/
+sncrs/logs/*.log
 sncrs/www/static/
 config/.env.prod
 sncrs/*.sqlite3
