@@ -8,6 +8,7 @@ apt-get install nginx netcat-traditional -y
 COPY nginx.default /etc/nginx/sites-available/default
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
+RUN sed -i 's|/run/nginx.pid|/tmp/nginx.pid|' /etc/nginx/nginx.conf
 
 ENV PYTHONBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -18,6 +19,7 @@ RUN \
 pip install --upgrade pip && \
 pip install -r requirements.txt --no-cache-dir
 COPY . /sncrs
-RUN chown -R www-data:www-data /sncrs
+RUN chown -R www-data:www-data /sncrs /var/lib/nginx /var/www
+USER www-data
 STOPSIGNAL SIGTERM
 CMD ["/sncrs/start_server.sh"]
