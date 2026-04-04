@@ -8,10 +8,10 @@ done
 
 echo 'PostgreSQL started'
 
-(cd /sncrs/; python manage.py collectstatic --no-input; python manage.py makemigrations --no-input; python manage.py migrate --no-input)
+(cd /sncrs/; sudo -u www-data python manage.py collectstatic --no-input; sudo -u www-data python manage.py makemigrations --no-input; sudo -u www-data python manage.py migrate --no-input)
 
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ] ; then
-    (cd /sncrs/; python manage.py createsuperuser --no-input)
+    (cd /sncrs/; sudo -u www-data python manage.py createsuperuser --no-input)
 fi
 
 reload_args=()
