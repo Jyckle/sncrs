@@ -1,12 +1,49 @@
 from django_filters import rest_framework as filters
 from django.db.models import Q
-
+from django.forms.fields import MultipleChoiceField
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
     Greeting, Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, 
     SocialLink, Lesson, GameTitle
 )
 
+class CaseInsensitiveMultipleChoiceField(MultipleChoiceField):
+
+    def valid_value(self, value):
+        """Check to see if the provided value is a valid choice."""
+        text_value = str(value)
+        text_value = value.lower()
+        for k, v in self.choices:
+            if isinstance(v, (list, tuple)):
+                # This is an optgroup, so look inside the group for options
+                for k2, v2 in v:
+                    if value == k2 or text_value == str(k2).lower():
+                        return True
+            else:
+                if value == k or text_value == str(k).lower():
+                    return True
+        return False
+
+class AllValuesMultipleFilterLowercase(filters.MultipleChoiceFilter):
+    always_filter = False
+    field_class = CaseInsensitiveMultipleChoiceField
+
+    @property
+    def field(self):
+        qs = self.model._default_manager.distinct()
+        qs = qs.order_by(self.field_name).values_list(self.field_name, flat=True)
+        choices = {}
+        for o in qs:
+            try:
+                value = o.lower()
+            except AttributeError:
+                value = o
+            entry = (value, value)
+            if entry not in choices:
+                choices[entry] = None
+        self.extra["choices"] = list(choices.keys())
+        return super().field
+    
 class CharInFilter(filters.BaseInFilter, filters.CharFilter):
     pass
 
@@ -110,7 +147,7 @@ class MatchupFilter(filters.FilterSet):
 
 
 class ClipFilter(filters.FilterSet):
-    tags = filters.CharFilter(label='tags', field_name="tags__tag", lookup_expr="iexact")
+    tags = AllValuesMultipleFilterLowercase(label='tags', field_name="tags__tag", lookup_expr="iexact", conjoined=True)
     title = filters.CharFilter(label='title', lookup_expr="icontains")
 
     class Meta:
@@ -148,8 +185,8 @@ class SocialLinkFilter(filters.FilterSet):
         }
 
 class QuoteFilter(filters.FilterSet):
-    tags = filters.CharFilter(label='tags', field_name="tags__tag", lookup_expr="iexact")
-    speakers = filters.CharFilter(label='speakers', field_name="speakers__name", lookup_expr="iexact")
+    tags = AllValuesMultipleFilterLowercase(label='tags', field_name="tags__tag", lookup_expr="iexact", conjoined=True)
+    speakers = AllValuesMultipleFilterLowercase(label='speakers', field_name="speakers__name", lookup_expr="iexact", conjoined=True)
     text = filters.CharFilter(label='text', lookup_expr="icontains")
 
     class Meta:
