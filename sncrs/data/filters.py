@@ -12,7 +12,7 @@ class CaseInsensitiveMultipleChoiceField(MultipleChoiceField):
     def valid_value(self, value):
         """Check to see if the provided value is a valid choice."""
         text_value = str(value)
-        text_value = value.lower()
+        text_value = text_value.lower()
         for k, v in self.choices:
             if isinstance(v, (list, tuple)):
                 # This is an optgroup, so look inside the group for options
