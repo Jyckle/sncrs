@@ -13,7 +13,7 @@ from .utility_functions import assign_score_based_ranks
 def store_previous_snapshot_or_current_scores(c_sn, score_type):
     # calculate current ranks
     people = Person.objects.filter(tag=Person.MEMBER)
-    previous_sn_in_season = SmashNight.objects.exclude(pk=c_sn.pk).filter(season=c_sn.season).order_by('-night_count').first()
+    previous_sn_in_season = SmashNight.objects.filter(season=c_sn.season, date__lt=c_sn.date).order_by('-night_count').first()
     if score_type == "start" and previous_sn_in_season:
         for c_person in people:
             try:
