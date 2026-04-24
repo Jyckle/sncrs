@@ -1274,6 +1274,7 @@ class Matchup(models.Model):
     px_additional_set_wins = models.IntegerField(default=0, blank=True)
     py_additional_set_wins = models.IntegerField(default=0, blank=True)
     matchup_type = models.ForeignKey(MatchupType, on_delete=models.SET_NULL, null=True, related_name='game_matchup_set')
+    game_title = models.ForeignKey(GameTitle, on_delete=models.SET_DEFAULT, default=get_default_game_title)
     set_matchup_type = models.ForeignKey(
         MatchupType,
         on_delete=models.SET_NULL,
