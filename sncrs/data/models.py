@@ -443,7 +443,7 @@ class Bracket(models.Model):
                         round=match["round"],
                         sn=self.sn,
                         bracket=self,
-                        # game_title = self.game_title
+                        game_title = self.game_title
                     )
                 )
                 if created:
@@ -864,7 +864,7 @@ class Match(models.Model):
     p2_score_change = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     sn = models.ForeignKey(SmashNight, on_delete=models.SET_NULL, null=True, blank=True)
     bracket = models.ForeignKey(Bracket, on_delete=models.SET_NULL, null=True, blank=True)
-    # TODO: game_title = HOW TO SET IT TO THE BRACKET'S GAME TITLE 
+    game_title = models.ForeignKey(GameTitle, on_delete=models.SET_DEFAULT, default=get_default_game_title) 
     challonge_id = models.IntegerField(null=True, blank=True)
     match_url = models.URLField(max_length=200, null=True, blank=True)
     round = models.IntegerField(null=True, blank=True)
@@ -1036,7 +1036,7 @@ class MatchupQuerySet(models.QuerySet):
     not be included here.
     """
 
-    def safe_get_matchup(self, px: Person, py: Person):
+    def safe_get_matchup(self, px: Person, py: Person, title: GameTitle):
         """
         Get the matchup based on two people in a safe manner. If it does not exist,
         return None, else, return the matchup.
@@ -1044,22 +1044,24 @@ class MatchupQuerySet(models.QuerySet):
         Parameters
         ----------
         px, py: Person
-
+            The people to find a matchup for
+        title: GameTitle
+            The game being played in this matchup
         Returns
         -------
         matchup: Matchup
             The found matchup, or None
         """
         try:
-            c_matchup = self.get(px=px, py=py)
+            c_matchup = self.get(px=px, py=py, game_title=title)
             return c_matchup
         except Matchup.MultipleObjectsReturned:
-            print(f"Error: Multiple matchups found between {px.display_name} and {py.display_name}")
+            print(f"Error: Multiple matchups found between {px.display_name} and {py.display_name} for {title.description}")
         except Matchup.DoesNotExist:
             pass
         return None
 
-    def safe_get_matchup_wins(self, px: Person, py: Person) -> tuple[int, int]:
+    def safe_get_matchup_wins(self, px: Person, py: Person, title: GameTitle) -> tuple[int, int]:
         """
         Check if there are any exceptions with a specific matchup and return total wins if not
 
@@ -1067,13 +1069,14 @@ class MatchupQuerySet(models.QuerySet):
         ----------
         px, py: Person
             The people to find a matchup for
-
+        title: GameTitle
+            The game being played in this matchup
         Returns
         -------
         int, int
             px_total_wins, py_total_wins, or None, None
         """
-        c_matchup = self.safe_get_matchup(px, py)
+        c_matchup = self.safe_get_matchup(px, py, title)
         if not c_matchup:
             return None, None
         px_total_wins, py_total_wins = c_matchup.get_total_wins()
