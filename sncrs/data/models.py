@@ -1217,25 +1217,28 @@ class MatchupQuerySet(models.QuerySet):
             matchup.set_matchup_type = MatchupType.objects.get_type_by_percent(matchup.set_win_percent)
             matchup.save()
 
-    def create_or_update_matchups_table(self, person_list: models.QuerySet = None) -> None:
+    def create_or_update_matchups_table(self, game_title: 'GameTitle', person_list: models.QuerySet = None) -> None:
         """
         Create or update the full matchups table with the given person_list
         During this process, do not overwrite additional_wins, as that is a manually entered value
 
         Parameters
         ----------
+        game_title: GameTitle
+            The game title to update matchups for
         person_list: models.QuerySet
             The list of people to generate the matchup table for. If not provided, defaults to all people
         """
         person_list = person_list or Person.objects.all()
         # Don't use matches that were a forfeit (someone has a negative score)
-        match_queryset = Match.objects.filter(p1_wins__gte=0, p2_wins__gte=0)
+        match_queryset = Match.objects.filter(p1_wins__gte=0, p2_wins__gte=0, game_title=game_title)
         for person_x, person_y in combinations(person_list, 2):
             px_wins, py_wins = match_queryset.get_player_game_wins(person_x, person_y)
             px_set_wins, py_set_wins = match_queryset.get_player_set_wins(person_x, person_y)
             self.update_or_create(
                 px=person_x,
                 py=person_y,
+                game_title=game_title,
                 defaults=dict(
                     px_wins=px_wins,
                     py_wins=py_wins,
@@ -1246,6 +1249,7 @@ class MatchupQuerySet(models.QuerySet):
             self.update_or_create(
                 py=person_x,
                 px=person_y,
+                game_title=game_title,
                 defaults=dict(
                     py_wins=px_wins,
                     px_wins=py_wins,
@@ -1253,7 +1257,7 @@ class MatchupQuerySet(models.QuerySet):
                     px_set_wins=py_set_wins,
                 )
             )
-        self.set_matchup_types()
+        self.filter(game_title=game_title).set_matchup_types()
 
 class MatchupManager(models.Manager.from_queryset(MatchupQuerySet)):
 
@@ -1291,6 +1295,9 @@ class Matchup(models.Model):
 
     class Meta:
         ordering = ["py__display_name"]
+        constraints = [
+            models.UniqueConstraint(fields=["px", "py", "game_title"], name="unique_matchup_per_game"),
+        ]
     
     def get_total_wins(self) -> tuple[int, int]:
         """

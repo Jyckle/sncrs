@@ -105,8 +105,10 @@ def players_view(request, *args, **kwargs):
 
 def matchups_view(request, *args, **kwargs):
     person_list = Person.objects.filter(tag=Person.MEMBER).order_by(Lower('display_name'))
+    game_title_list = GameTitle.objects.all()
     context = {
-        "person_list": person_list
+        "person_list": person_list,
+        "game_title_list": game_title_list,
     }
     return render(request, "data/matchups.html", context)
 

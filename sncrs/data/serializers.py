@@ -144,6 +144,7 @@ class GreetingSerializer(serializers.ModelSerializer):
 class MatchupSerializer(serializers.ModelSerializer):
     px = display_name_related_serializer()
     py = display_name_related_serializer()
+    game_title = serializers.StringRelatedField()
     px_total_game_wins = serializers.ReadOnlyField()
     py_total_game_wins = serializers.ReadOnlyField()
     px_total_set_wins = serializers.ReadOnlyField()
@@ -156,12 +157,13 @@ class MatchupSerializer(serializers.ModelSerializer):
         fields = [
             'px',
             'py',
+            'game_title',
             'px_total_game_wins',
             'py_total_game_wins',
             'px_total_set_wins',
             'py_total_set_wins',
             'total_sets',
-            'total_games', 
+            'total_games',
         ]
 
 

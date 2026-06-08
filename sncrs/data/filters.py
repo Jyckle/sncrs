@@ -137,12 +137,14 @@ class GreetingFilter(filters.FilterSet):
 class MatchupFilter(filters.FilterSet):
     px = filters.CharFilter(label='px', field_name="px__display_name", lookup_expr="iexact")
     py = filters.CharFilter(label='py', field_name="py__display_name", lookup_expr="iexact")
+    game_title = filters.CharFilter(label='game_title', field_name="game_title__name", lookup_expr="iexact")
 
     class Meta:
         model = Matchup
         fields = [
             'px',
             'py',
+            'game_title',
         ]
 
 

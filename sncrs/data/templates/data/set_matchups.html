@@ -1,7 +1,5 @@
 {% load extra_filters %}
 
-
-
 <div class="container">
   <h3 style="border-bottom:1px solid white; text-align: center; background-color: black; margin-bottom:0px"> Matchups by Set </h3>
 <div class="container table-wrapper">
@@ -19,7 +17,7 @@
         <tr>
           <th class="sticky-left black-bg" style="color:white;" scope="row">{{person.display_name}}</th>
           {% for person_y in person_list %}
-              {% with matchup=person|get_matchup:person_y %}
+              {% get_matchup_for_game person person_y game_title as matchup %}
               {% if matchup == None %}
                 <td style="background-color:#333333; color:white;">
               {% elif matchup.px_set_wins|add:matchup.px_additional_set_wins != 0 or matchup.py_set_wins|add:matchup.py_additional_set_wins != 0 %}
@@ -31,7 +29,6 @@
               {% else %}
                 <td style="background-color:#333333; color:white;">
               {% endif %}
-              {% endwith %}
             </td>
           {% endfor %}
         </tr>

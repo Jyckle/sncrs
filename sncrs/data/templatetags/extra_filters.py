@@ -101,6 +101,13 @@ def get_matchup(person_x, person_y):
         matchup = None
     return matchup
 
+@register.simple_tag
+def get_matchup_for_game(person_x, person_y, game_title):
+    try:
+        return person_x.px_matchup_set.get(py=person_y, game_title=game_title)
+    except:
+        return None
+
 @register.filter
 def get_smashnights(person, sns_to_include):
     sn_set = sns_to_include.filter(Q(match__p1=person) | Q(match__p2=person)).distinct()
