@@ -41,6 +41,3 @@ def full_update(sn):
 
     # Store the updated scores as Snapshot for each person
     store_previous_snapshot_or_current_scores(sn, "end")
-
-    # set everyone's demon as calculated by the new data
-    Person.objects.filter(tag=Person.MEMBER).set_demons()

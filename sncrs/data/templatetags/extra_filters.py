@@ -109,6 +109,14 @@ def get_matchup_for_game(person_x, person_y, game_title):
         return None
 
 @register.filter
+def get_item(d, key):
+    return d.get(key)
+
+@register.simple_tag
+def get_mains_for_game(person, game_title):
+    return person.main_set.filter(character__game_title=game_title).order_by('order')
+
+@register.filter
 def get_smashnights(person, sns_to_include):
     sn_set = sns_to_include.filter(Q(match__p1=person) | Q(match__p2=person)).distinct()
     return sn_set

@@ -94,7 +94,7 @@ class PersonSerializer(serializers.ModelSerializer):
     mains = serializers.SerializerMethodField()
     rivals = serializers.SerializerMethodField()
     all_names = serializers.SerializerMethodField()
-    bracket_demon = display_name_related_serializer()
+    demons = serializers.SerializerMethodField()
     team = name_related_serializer()
     tag = serializers.CharField(
         source='get_tag_display'
@@ -111,7 +111,7 @@ class PersonSerializer(serializers.ModelSerializer):
             'team',
             'rank',
             'score',
-            'bracket_demon',
+            'demons',
             'tag',
             'debut',
             'mains',
@@ -119,10 +119,20 @@ class PersonSerializer(serializers.ModelSerializer):
             ]
     
     def get_mains(self, obj):
-        return obj.main_set.all().order_by('order').values_list('character__name', flat=True)
+        mains = {}
+        for gt in GameTitle.objects.all():
+            mains[gt.name] = list(
+                obj.main_set.filter(character__game_title=gt)
+                    .order_by('order')
+                    .values_list('character__name', flat=True)[:3]
+            )
+        return mains
 
     def get_rivals(self, obj):
-        return obj.rivals[:2]
+        return {game_title: names[:2] for game_title, names in obj.rivals.items()}
+    
+    def get_demons(self, obj):
+        return {game_title: names[:1] for game_title, names in obj.demons.items()}
     
     def get_all_names(self, obj):
         return [obj.display_name, *list(obj.alias_set.values_list('name', flat=True))]

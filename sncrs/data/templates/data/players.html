@@ -8,67 +8,97 @@
 {% load static %}
 {% load extra_filters %}
 <div class="container">
-<div class="container table-wrapper">
-  <table class="table table-dark table-bordered align-middle text-center table-sticky table-custom-striped">
-    <thead>
-      <tr class="sticky-top-row black-bg-row">
-        <th scope="col">Team</th>
-        <th scope="col">Name</th>
-        <th scope="col">Place</th>
-        <th scope="col">Score</th>
-        <th scope="col" colspan="3">Mains</th>
-        <th scope="col" colspan="2">Rivals</th>
-        <th scope="col">Bracket Demon</th>
-        <th scope="col">Friend Code</th>
-      </tr>
-      </thead>
-      <tbody>
-        {% for person in person_list %}
-          <tr>
-            <td>
-              {% if person.team.logo %}
-              <img style="max-width:75px; max-height:75px" src="{{person.team.logo.url}}" alt="Team logo for {{person.team.name}}">
-              {% endif %}
-            </td>
-            <th>{{person.display_name}}</th>
-            <td>{{person.rank}}</td>
-            <td>{{person.score}}</td>
 
-            {% for main in person.main_set.all|filled_slice:3 %}
-              {% if main != None %}
+  <ul class="nav nav-tabs mb-3" id="playerTabs" role="tablist">
+    {% for gt in game_title_list %}
+    <li class="nav-item" role="presentation">
+      <button class="nav-link {% if forloop.first %}active{% endif %}"
+              id="tab-{{ gt.pk }}"
+              data-bs-toggle="tab"
+              data-bs-target="#pane-{{ gt.pk }}"
+              type="button" role="tab">
+        {{ gt }}
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="tab-content" id="playerTabContent">
+    {% for gt in game_title_list %}
+    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}"
+         id="pane-{{ gt.pk }}"
+         role="tabpanel">
+      <div class="container table-wrapper">
+        <table class="table table-dark table-bordered align-middle text-center table-sticky table-custom-striped">
+          <thead>
+            <tr class="sticky-top-row black-bg-row">
+              <th scope="col">Team</th>
+              <th scope="col">Name</th>
+              <th scope="col">Place</th>
+              <th scope="col">Score</th>
+              <th scope="col" colspan="3">Mains</th>
+              <th scope="col" colspan="2">Rivals</th>
+              <th scope="col">Demon</th>
+              {% if gt.name == "SSBU" %}
+              <th scope="col">Friend Code</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for person in person_list %}
+            <tr>
               <td>
-                <img 
-                  style= "max-width:75px; max-height:75px" 
-                  src="{% static main.character.static_image_name %}"
-                  onerror="this.onerror = null; this.src='{{main.character.image_url}}'"
-                  alt="{{main.character.name}}"
-                >
+                {% if person.team.logo %}
+                <img style="max-width:75px; max-height:75px" src="{{ person.team.logo.url }}" alt="Team logo for {{ person.team.name }}">
+                {% endif %}
               </td>
-              {% else %}
-              <td>--</td>
-              {% endif %}
-            {% endfor %}
-            
-            {% for rival in person.rivals.all|filled_slice:2 %}
-              {% if rival != None %}
-                <td class="rival">{{rival}}</td>
-              {% else %}
+              <th>{{ person.display_name }}</th>
+              <td>{{ person.rank }}</td>
+              <td>{{ person.score }}</td>
+
+              {% get_mains_for_game person gt as mains %}
+              {% for main in mains|filled_slice:3 %}
+                {% if main != None %}
+                <td>
+                  <img
+                    style="max-width:75px; max-height:75px"
+                    src="{% static main.character.static_image_name %}"
+                    onerror="this.onerror = null; this.src='{{ main.character.image_url }}'"
+                    alt="{{ main.character.name }}"
+                  >
+                </td>
+                {% else %}
                 <td>--</td>
+                {% endif %}
+              {% endfor %}
+
+              {% for rival in person.rivals|get_item:gt.name|filled_slice:2 %}
+                {% if rival != None %}
+                <td class="rival">{{ rival }}</td>
+                {% else %}
+                <td>--</td>
+                {% endif %}
+              {% endfor %}
+
+              {% with demon_list=person.demons|get_item:gt.name|filled_slice:1 %}
+                {% if demon_list.0 != None %}
+                <td class="demon">{{ demon_list.0 }}</td>
+                {% else %}
+                <td>--</td>
+                {% endif %}
+              {% endwith %}
+
+              {% if gt.name == "SSBU" %}
+              <td>{{ person.friend_code }}</td>
               {% endif %}
+            </tr>
             {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
 
-            {% if person.bracket_demon != None %}
-              <td class="demon">{{person.bracket_demon.display_name}}</td>
-            {% else %}
-              <td>--</td>
-            {% endif %}
-
-            <td>{{person.friend_code}}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-  </table>
 </div>
-</div>
-
 {% endblock %}

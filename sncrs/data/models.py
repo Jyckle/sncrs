@@ -33,7 +33,7 @@ class Character(models.Model):
         return "data/characters/" + re.sub(r'[\W]+', '', re.sub('[\W ]+', '_', self.name.lower())) + ".webp"
 
     def __str__(self):
-        return self.name
+        return f"{self.name} in {self.game_title}"
 
     class Meta:
         ordering = ["name", "character_id"]
@@ -88,15 +88,7 @@ class PersonQuerySet(models.QuerySet):
         for person in self.all():
             if person.is_name(text):
                 return person
-        return None
-    
-    def set_demons(self):
-        """Set bracket demons for the provided group of people"""
-        for person in self:
-            person.bracket_demon = Person.objects.get(display_name=person.demons[0])
-            person.save()
-    
-
+        return None    
 
 class PersonManager(models.Manager.from_queryset(PersonQuerySet)):
 
@@ -113,13 +105,6 @@ class Person(models.Model):
     rank = models.IntegerField(null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
     friend_code = models.CharField(max_length=20, null=True, blank=True)
-    bracket_demon = models.ForeignKey(
-        "self",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='demon_set'
-    )
     mains = models.ManyToManyField(Character, through="PreferredCharacter")
 
     MEMBER = 0
@@ -156,11 +141,21 @@ class Person(models.Model):
 
     @property
     def rivals(self):
-        return self.px_matchup_set.order_by('-rival_score').values_list('py__display_name', flat=True)
+        # avoiding list comprehension for readability
+        rivals_dict = {}
+        for gt in GameTitle.objects.all():
+            rivals_dict[gt.name] = self.px_matchup_set.filter(game_title=gt).order_by('-rival_score').\
+                values_list('py__display_name', flat=True)
+        return rivals_dict
 
     @property
     def demons(self):
-        return self.px_matchup_set.order_by('-demon_score').values_list('py__display_name', flat=True)
+        # avoiding list comprehension for [my] readability
+        demons_dict = {}  # Heh that demon_dict tho
+        for gt in GameTitle.objects.all():
+            demons_dict[gt.name] = self.px_matchup_set.filter(game_title=gt).order_by('-demon_score').\
+                values_list('py__display_name', flat=True)
+        return demons_dict
 
     def get_names(self):
         """
@@ -212,7 +207,7 @@ class PreferredCharacter(models.Model):
     order = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.person}: {self.character}"
+        return f"{self.person}: {self.character} in {self.character.game_title}"
 
     class Meta:
         ordering = ["order"]
@@ -1291,7 +1286,7 @@ class Matchup(models.Model):
     objects = MatchupManager()
 
     def __str__(self):
-        return "{} vs. {}".format(self.px, self.py)
+        return "{} vs. {} in {}".format(self.px, self.py, self.game_title)
 
     class Meta:
         ordering = ["py__display_name"]
