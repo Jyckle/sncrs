@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0082_backfill_challenge_match_game_titles'),
+        ('data', '0081_backfill_match_game_titles'),
     ]
 
     operations = [
