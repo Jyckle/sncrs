@@ -17,7 +17,7 @@
         <tr>
           <th class="sticky-left black-bg" style="color:white;" scope="row">{{person.display_name}}</th>
           {% for person_y in person_list %}
-              {% with matchup=person|get_matchup:person_y %}
+              {% get_matchup_for_game person person_y game_title as matchup %}
               {% if matchup == None %}
                 <td style="background-color:#333333; color:white;">
               {% elif matchup.px_wins|add:matchup.px_additional_wins or matchup.py_wins|add:matchup.py_additional_wins %}
@@ -29,7 +29,6 @@
               {% else %}
                 <td style="background-color:#333333; color:white;">
               {% endif %}
-              {% endwith %}
             </td>
           {% endfor %}
         </tr>

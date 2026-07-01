@@ -33,7 +33,7 @@ class Character(models.Model):
         return "data/characters/" + re.sub(r'[\W]+', '', re.sub('[\W ]+', '_', self.name.lower())) + ".webp"
 
     def __str__(self):
-        return self.name
+        return f"{self.name} in {self.game_title}"
 
     class Meta:
         ordering = ["name", "character_id"]
@@ -88,15 +88,7 @@ class PersonQuerySet(models.QuerySet):
         for person in self.all():
             if person.is_name(text):
                 return person
-        return None
-    
-    def set_demons(self):
-        """Set bracket demons for the provided group of people"""
-        for person in self:
-            person.bracket_demon = Person.objects.get(display_name=person.demons[0])
-            person.save()
-    
-
+        return None    
 
 class PersonManager(models.Manager.from_queryset(PersonQuerySet)):
 
@@ -113,13 +105,6 @@ class Person(models.Model):
     rank = models.IntegerField(null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
     friend_code = models.CharField(max_length=20, null=True, blank=True)
-    bracket_demon = models.ForeignKey(
-        "self",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='demon_set'
-    )
     mains = models.ManyToManyField(Character, through="PreferredCharacter")
 
     MEMBER = 0
@@ -156,11 +141,21 @@ class Person(models.Model):
 
     @property
     def rivals(self):
-        return self.px_matchup_set.order_by('-rival_score').values_list('py__display_name', flat=True)
+        # avoiding list comprehension for readability
+        rivals_dict = {}
+        for gt in GameTitle.objects.all():
+            rivals_dict[gt.name] = self.px_matchup_set.filter(game_title=gt).order_by('-rival_score').\
+                values_list('py__display_name', flat=True)
+        return rivals_dict
 
     @property
     def demons(self):
-        return self.px_matchup_set.order_by('-demon_score').values_list('py__display_name', flat=True)
+        # avoiding list comprehension for [my] readability
+        demons_dict = {}  # Heh that demon_dict tho
+        for gt in GameTitle.objects.all():
+            demons_dict[gt.name] = self.px_matchup_set.filter(game_title=gt).order_by('-demon_score').\
+                values_list('py__display_name', flat=True)
+        return demons_dict
 
     def get_names(self):
         """
@@ -212,7 +207,7 @@ class PreferredCharacter(models.Model):
     order = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.person}: {self.character}"
+        return f"{self.person}: {self.character} in {self.character.game_title}"
 
     class Meta:
         ordering = ["order"]
@@ -443,7 +438,7 @@ class Bracket(models.Model):
                         round=match["round"],
                         sn=self.sn,
                         bracket=self,
-                        # game_title = self.game_title
+                        game_title = self.game_title
                     )
                 )
                 if created:
@@ -864,7 +859,7 @@ class Match(models.Model):
     p2_score_change = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     sn = models.ForeignKey(SmashNight, on_delete=models.SET_NULL, null=True, blank=True)
     bracket = models.ForeignKey(Bracket, on_delete=models.SET_NULL, null=True, blank=True)
-    # TODO: game_title = HOW TO SET IT TO THE BRACKET'S GAME TITLE 
+    game_title = models.ForeignKey(GameTitle, on_delete=models.SET_DEFAULT, default=get_default_game_title) 
     challonge_id = models.IntegerField(null=True, blank=True)
     match_url = models.URLField(max_length=200, null=True, blank=True)
     round = models.IntegerField(null=True, blank=True)
@@ -1036,7 +1031,7 @@ class MatchupQuerySet(models.QuerySet):
     not be included here.
     """
 
-    def safe_get_matchup(self, px: Person, py: Person):
+    def safe_get_matchup(self, px: Person, py: Person, title: GameTitle):
         """
         Get the matchup based on two people in a safe manner. If it does not exist,
         return None, else, return the matchup.
@@ -1044,22 +1039,24 @@ class MatchupQuerySet(models.QuerySet):
         Parameters
         ----------
         px, py: Person
-
+            The people to find a matchup for
+        title: GameTitle
+            The game being played in this matchup
         Returns
         -------
         matchup: Matchup
             The found matchup, or None
         """
         try:
-            c_matchup = self.get(px=px, py=py)
+            c_matchup = self.get(px=px, py=py, game_title=title)
             return c_matchup
         except Matchup.MultipleObjectsReturned:
-            print(f"Error: Multiple matchups found between {px.display_name} and {py.display_name}")
+            print(f"Error: Multiple matchups found between {px.display_name} and {py.display_name} for {title.description}")
         except Matchup.DoesNotExist:
             pass
         return None
 
-    def safe_get_matchup_wins(self, px: Person, py: Person) -> tuple[int, int]:
+    def safe_get_matchup_wins(self, px: Person, py: Person, title: GameTitle) -> tuple[int, int]:
         """
         Check if there are any exceptions with a specific matchup and return total wins if not
 
@@ -1067,13 +1064,14 @@ class MatchupQuerySet(models.QuerySet):
         ----------
         px, py: Person
             The people to find a matchup for
-
+        title: GameTitle
+            The game being played in this matchup
         Returns
         -------
         int, int
             px_total_wins, py_total_wins, or None, None
         """
-        c_matchup = self.safe_get_matchup(px, py)
+        c_matchup = self.safe_get_matchup(px, py, title)
         if not c_matchup:
             return None, None
         px_total_wins, py_total_wins = c_matchup.get_total_wins()
@@ -1214,25 +1212,28 @@ class MatchupQuerySet(models.QuerySet):
             matchup.set_matchup_type = MatchupType.objects.get_type_by_percent(matchup.set_win_percent)
             matchup.save()
 
-    def create_or_update_matchups_table(self, person_list: models.QuerySet = None) -> None:
+    def create_or_update_matchups_table(self, game_title: 'GameTitle', person_list: models.QuerySet = None) -> None:
         """
         Create or update the full matchups table with the given person_list
         During this process, do not overwrite additional_wins, as that is a manually entered value
 
         Parameters
         ----------
+        game_title: GameTitle
+            The game title to update matchups for
         person_list: models.QuerySet
             The list of people to generate the matchup table for. If not provided, defaults to all people
         """
         person_list = person_list or Person.objects.all()
         # Don't use matches that were a forfeit (someone has a negative score)
-        match_queryset = Match.objects.filter(p1_wins__gte=0, p2_wins__gte=0)
+        match_queryset = Match.objects.filter(p1_wins__gte=0, p2_wins__gte=0, game_title=game_title)
         for person_x, person_y in combinations(person_list, 2):
             px_wins, py_wins = match_queryset.get_player_game_wins(person_x, person_y)
             px_set_wins, py_set_wins = match_queryset.get_player_set_wins(person_x, person_y)
             self.update_or_create(
                 px=person_x,
                 py=person_y,
+                game_title=game_title,
                 defaults=dict(
                     px_wins=px_wins,
                     py_wins=py_wins,
@@ -1243,6 +1244,7 @@ class MatchupQuerySet(models.QuerySet):
             self.update_or_create(
                 py=person_x,
                 px=person_y,
+                game_title=game_title,
                 defaults=dict(
                     py_wins=px_wins,
                     px_wins=py_wins,
@@ -1250,7 +1252,7 @@ class MatchupQuerySet(models.QuerySet):
                     px_set_wins=py_set_wins,
                 )
             )
-        self.set_matchup_types()
+        self.filter(game_title=game_title).set_matchup_types()
 
 class MatchupManager(models.Manager.from_queryset(MatchupQuerySet)):
 
@@ -1274,6 +1276,7 @@ class Matchup(models.Model):
     px_additional_set_wins = models.IntegerField(default=0, blank=True)
     py_additional_set_wins = models.IntegerField(default=0, blank=True)
     matchup_type = models.ForeignKey(MatchupType, on_delete=models.SET_NULL, null=True, related_name='game_matchup_set')
+    game_title = models.ForeignKey(GameTitle, on_delete=models.SET_DEFAULT, default=get_default_game_title)
     set_matchup_type = models.ForeignKey(
         MatchupType,
         on_delete=models.SET_NULL,
@@ -1283,10 +1286,13 @@ class Matchup(models.Model):
     objects = MatchupManager()
 
     def __str__(self):
-        return "{} vs. {}".format(self.px, self.py)
+        return "{} vs. {} in {}".format(self.px, self.py, self.game_title)
 
     class Meta:
         ordering = ["py__display_name"]
+        constraints = [
+            models.UniqueConstraint(fields=["px", "py", "game_title"], name="unique_matchup_per_game"),
+        ]
     
     def get_total_wins(self) -> tuple[int, int]:
         """

@@ -2,7 +2,7 @@
 
 from .utility_functions import update_all_scores
 from .snapshot_logic import store_previous_snapshot_or_current_scores
-from .models import Matchup, Person
+from .models import GameTitle, Matchup, Person
 
 
 def set_challonge_data(sn):
@@ -17,8 +17,9 @@ def set_challonge_data(sn):
 
 
 def set_sncrs_data(sn):
-    # create or update the matchup table
-    Matchup.objects.create_or_update_matchups_table()
+    # create or update the matchup table for each game title played this night
+    for game_title in GameTitle.objects.filter(bracket__sn=sn).distinct():
+        Matchup.objects.create_or_update_matchups_table(game_title=game_title)
     # Create all the attendee rankings for this smashNight and record initial scores
     sn.create_all_attendee_ranks()
     # update attendee scores
@@ -40,6 +41,3 @@ def full_update(sn):
 
     # Store the updated scores as Snapshot for each person
     store_previous_snapshot_or_current_scores(sn, "end")
-
-    # set everyone's demon as calculated by the new data
-    Person.objects.filter(tag=Person.MEMBER).set_demons()
