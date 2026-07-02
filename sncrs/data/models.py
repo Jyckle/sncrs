@@ -1148,15 +1148,16 @@ class MatchupQuerySet(models.QuerySet):
         This score indicates the status of person y as a demon to person x
         with higher values indicating person y is more likely to be the demon for person x
         """
-        total_wins_annotated = self.set_total_game_wins_annotation()
+        total_wins_annotated = self.set_total_set_wins_annotation()
         annotated = total_wins_annotated.annotate(
             demon_score=Cast(
                 Coalesce(
                     Case(
-                        When(px_total_game_wins=0.0, py_total_game_wins=0.0, then=-1000.0),
-                        When(px_total_game_wins__lt=F('py_total_game_wins'),
-                             then=(F('py_total_game_wins') - F('px_total_game_wins') / 10.0)),
-                        default=F('py_total_game_wins') * 25.0 - F('px_total_game_wins') * 13.0
+                        When(px_total_set_wins=0, py_total_set_wins=0, then=-1000.0),
+                        default=(
+                            F('py_total_set_wins') * F('py_total_set_wins') * 1.0 /
+                            (F('py_total_set_wins') + F('px_total_set_wins'))
+                        )
                     ),
                     -1000.0
                 ),
