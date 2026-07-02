@@ -1155,7 +1155,7 @@ class MatchupQuerySet(models.QuerySet):
                     Case(
                         When(px_total_set_wins=0, py_total_set_wins=0, then=-1000.0),
                         default=(
-                            F('py_total_set_wins') * F('py_total_set_wins') * 1.0 /
+                            (F('py_total_set_wins') - F('px_total_set_wins')) * 1.0 *
                             (F('py_total_set_wins') + F('px_total_set_wins'))
                         )
                     ),
