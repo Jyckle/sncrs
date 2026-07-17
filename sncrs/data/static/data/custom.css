@@ -98,6 +98,21 @@
   background-color:blue;
 }
 
+#bootstrap-overrides .medal_gold {
+  background-color:gold;
+  color:black;
+}
+
+#bootstrap-overrides .medal_silver {
+  background-color:silver;
+  color:black;
+}
+
+#bootstrap-overrides .medal_bronze {
+  background-color:#CD7F32;
+  color:black;
+}
+
 #bootstrap-overrides .rankRow{
   vertical-align: middle;
   text-align: center;
@@ -111,10 +126,39 @@
     background-color: darkred;
 }
 
+#bootstrap-overrides .table-custom-striped tr:nth-child(odd) .medal_gold{
+    background-color: darkgoldenrod;
+    color: white;
+}
+
+#bootstrap-overrides .table-custom-striped tr:nth-child(odd) .medal_silver{
+    background-color: #71706E;
+    color: white;
+}
+
+#bootstrap-overrides .table-custom-striped tr:nth-child(odd) .medal_bronze{
+    background-color: #804A00;
+    color: white;
+}
+
 #bootstrap-overrides .table-custom-striped tr:nth-child(even) td,
 #bootstrap-overrides .table-custom-striped tr:nth-child(even) th{
     background-color: #343a40;
+}
 
+#bootstrap-overrides .table-custom-striped tr:nth-child(even) .medal_gold{
+    background-color: gold;
+    color: black;
+}
+
+#bootstrap-overrides .table-custom-striped tr:nth-child(even) .medal_silver{
+    background-color: silver;
+    color: black;
+}
+
+#bootstrap-overrides .table-custom-striped tr:nth-child(even) .medal_bronze{
+    background-color: #CD7F32;
+    color: black;
 }
 
 #bootstrap-overrides .venueBio{

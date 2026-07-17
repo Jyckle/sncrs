@@ -6,7 +6,7 @@
   </thead>
   <tbody>
     <tr>
-      <td style="background-color:#FFD700; color:black;">
+      <td class="medal_gold">
         {% if snapshot_set.0.person != None %}
           {{snapshot_set.0.person}}
         {% else %}
@@ -15,7 +15,7 @@
       </td>
     </tr>
     <tr>
-      <td style="background-color:#C0C0C0; color:black;">
+      <td class="medal_silver">
         {% if snapshot_set.1.person != None %}
           {{snapshot_set.1.person}}
         {% else %}
@@ -24,7 +24,7 @@
       </td>
     </tr>
     <tr>
-      <td style="background-color:#CD7F32; color:black;">
+      <td class="medal_bronze">
         {% if snapshot_set.2.person != None %}
           {{snapshot_set.2.person}}
         {% else %}

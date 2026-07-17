@@ -35,7 +35,12 @@
               <th scope="col">Team</th>
               <th scope="col">Name</th>
               <th scope="col">Place</th>
-              <th scope="col">Score</th>
+              {% if gt.name == "SSBU" %}
+              <th scope="col" colspan="3">Medals (EB)</th>
+              <th scope="col" colspan="3">Medals (CB)</th>
+              {% else %}
+              <th scope="col" colspan="3">Medals</th>
+              {% endif %}
               <th scope="col" colspan="3">Mains</th>
               <th scope="col" colspan="2">Rivals</th>
               <th scope="col">Demon</th>
@@ -54,7 +59,16 @@
               </td>
               <th>{{ person.display_name }}</th>
               <td>{{ person.rank }}</td>
-              <td>{{ person.score }}</td>
+
+              {% get_medal_for_game person gt as medal %}
+              <td class="medal_gold">{{ medal.elite_gold|default:0 }}</td>
+              <td class="medal_silver">{{ medal.elite_silver|default:0 }}</td>
+              <td class="medal_bronze">{{ medal.elite_bronze|default:0 }}</td>
+              {% if gt.name == "SSBU" %}
+              <td class="medal_gold">{{ medal.challenger_gold|default:0 }}</td>
+              <td class="medal_silver">{{ medal.challenger_silver|default:0 }}</td>
+              <td class="medal_bronze">{{ medal.challenger_bronze|default:0 }}</td>
+              {% endif %}
 
               {% get_mains_for_game person gt as mains %}
               {% for main in mains|filled_slice:3 %}

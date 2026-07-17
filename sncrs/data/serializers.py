@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from data.models import (
     Match, PersonSnapshot, SmashNight,
-    Person, Character, Greeting, Matchup, Clip, ClipTag,
+    Person, Character, Greeting, Matchup, Medal, Clip, ClipTag,
     Quote, QuoteTag, QuoteSpeaker, Whine, SocialLink, Site,
     Lesson, TwitchToken, GameTitle,
 )
@@ -174,6 +174,27 @@ class MatchupSerializer(serializers.ModelSerializer):
             'py_total_set_wins',
             'total_sets',
             'total_games',
+        ]
+
+
+class MedalSerializer(serializers.ModelSerializer):
+    person = display_name_related_serializer()
+    game_title = serializers.StringRelatedField()
+
+    class Meta:
+        model = Medal
+        fields = [
+            'id',
+            'person',
+            'game_title',
+            'elite_gold',
+            'elite_silver',
+            'elite_bronze',
+            'challenger_gold',
+            'challenger_silver',
+            'challenger_bronze',
+            'elite_medal_brackets',
+            'challenger_medal_brackets',
         ]
 
 
