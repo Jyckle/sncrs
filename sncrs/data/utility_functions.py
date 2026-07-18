@@ -1,6 +1,5 @@
 # utility_functions.py
 
-import challonge
 from .models import Person, Matchup
 # import pandas
 import os

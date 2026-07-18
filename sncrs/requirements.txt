@@ -4,7 +4,7 @@ django-filter
 gunicorn
 google-api-python-client
 google-auth
-pychallonge>1.2
+pychallonge>=3.0
 psycopg2-binary
 requests
 Pillow

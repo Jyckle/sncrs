@@ -4,7 +4,7 @@ from django.db.models.functions import Lower, Concat, Abs, Coalesce, Cast
 from django.db import transaction
 
 import re
-import challonge
+from challonge import Client
 import os
 from typing import Tuple
 from collections import defaultdict
@@ -396,15 +396,15 @@ class Bracket(models.Model):
 
     def get_challonge_bracket_data(self) -> Tuple[list, list]:
         # Set up credentials to access challonge account
-        challonge.set_credentials(os.environ.get('CHALLONGE_USER'), os.environ.get('CHALLONGE_KEY'))
-        # get the challonge tournament
-        tournament = challonge.tournaments.show(self.url.replace("https://challonge.com/", ""))
-        # get all participants from challonge
-        participants = challonge.participants.index(tournament["id"])
-        # get all matches from challonge
-        matches = challonge.matches.index(tournament["id"])
+        with Client(user=os.environ.get('CHALLONGE_USER'), api_key=os.environ.get('CHALLONGE_KEY')) as challonge_client:
+            # get the challonge tournament
+            tournament = challonge_client.tournaments.show(self.url.replace("https://challonge.com/", ""))
+            # get all participants from challonge
+            participants = challonge_client.participants.index(tournament.id)
+            # get all matches from challonge
+            matches = challonge_client.matches.index(tournament.id)
 
-        return participants, matches
+            return participants, matches
 
 
     def create_matches(self):
@@ -413,20 +413,20 @@ class Bracket(models.Model):
         people = Person.objects
         # add all participants to id list
         for participant in participants:
-            sncrs_person = people.get_person(participant["name"])
+            sncrs_person = people.get_person(participant.name)
             if sncrs_person is not None:
-                participant_ids[participant["id"]] = sncrs_person
+                participant_ids[participant.id] = sncrs_person
 
         for match in matches:
             # if there is a score and two valid participants, add an element
-            scores_csv = match.get("scores_csv")
-            player1 = participant_ids.get(match.get("player1_id", "invalid_player_id"))
-            player2 = participant_ids.get(match.get("player2_id", "invalid_player_id"))
+            scores_csv = match.scores_csv
+            player1 = participant_ids.get(match.player1_id or "invalid_player_id")
+            player2 = participant_ids.get(match.player2_id or "invalid_player_id")
             if scores_csv and player1 and player2:
-                scores = re.split(r'(?<=\d)-(?=\d)|(?<=\d)-(?=-)', match["scores_csv"])
+                scores = re.split(r'(?<=\d)-(?=\d)|(?<=\d)-(?=-)', scores_csv)
                 sc1 = scores[0]
                 sc2 = scores[1]
-                match_id = match["id"]
+                match_id = match.id
                 match_object, created = Match.original_objects.update_or_create(
                     challonge_id=match_id,
                     p1=player1,
@@ -435,7 +435,7 @@ class Bracket(models.Model):
                         p1_wins=sc1,
                         p2_wins=sc2,
                         type=Match.BRACKET,
-                        round=match["round"],
+                        round=match.round,
                         sn=self.sn,
                         bracket=self,
                         game_title = self.game_title
