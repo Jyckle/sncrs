@@ -19,7 +19,7 @@ def set_challonge_data(sn):
 def set_sncrs_data(sn):
     # create or update the matchup table and medal counts for each game title played this night
     for game_title in GameTitle.objects.filter(bracket__sn=sn).distinct():
-        # Do we want to limit calculations to attendees?
+        # Limit calculations to attendees
         attendees = Person.objects.filter(
             placement__bracket__sn=sn, placement__bracket__game_title=game_title
         ).distinct()
