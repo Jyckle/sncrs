@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.forms.fields import MultipleChoiceField
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
-    Greeting, Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, 
+    Greeting, Matchup, Medal, Clip, ClipTag, Quote, QuoteTag, Whine,
     SocialLink, Lesson, GameTitle
 )
 
@@ -144,6 +144,18 @@ class MatchupFilter(filters.FilterSet):
         fields = [
             'px',
             'py',
+            'game_title',
+        ]
+
+
+class MedalFilter(filters.FilterSet):
+    person = filters.CharFilter(label='person', field_name="person__display_name", lookup_expr="iexact")
+    game_title = filters.CharFilter(label='game_title', field_name="game_title__name", lookup_expr="iexact")
+
+    class Meta:
+        model = Medal
+        fields = [
+            'person',
             'game_title',
         ]
 

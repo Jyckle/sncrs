@@ -9,7 +9,7 @@ from .models import (
     Alias, Seed, Placement, Attendee, Bracket,
     VenueImage, Venue, Character, PreferredCharacter,
     Person, SmashNight, Team, Match, StageType, Stage,
-    MatchupType, Matchup, PersonSnapshot, Greeting, Clip, 
+    MatchupType, Matchup, Medal, PersonSnapshot, Greeting, Clip,
     ClipTag, QuoteTag, QuoteSpeaker, Quote, Whine, SocialLink, Site,
     Lesson, TwitchToken, GameTitle,
 )
@@ -36,6 +36,9 @@ class SocialLinkInLine(admin.TabularInline):
 class PreferredCharacterInline(admin.TabularInline):
     model = PreferredCharacter
 
+class MedalInline(admin.TabularInline):
+    model = Medal
+
 class SeedInline(admin.TabularInline):
     model = Seed
 
@@ -57,6 +60,7 @@ class PersonAdmin(admin.ModelAdmin):
     inlines = [
         AliasInline,
         PreferredCharacterInline,
+        MedalInline,
         GreetingInline,
         WhineInline,
         SocialLinkInLine,
@@ -166,6 +170,7 @@ admin.site.register(Stage)
 admin.site.register(MatchupType, MatchupTypeAdmin)
 admin.site.register(PersonSnapshot)
 admin.site.register(Matchup)
+admin.site.register(Medal)
 admin.site.register(VenueImage)
 admin.site.register(Venue, VenueAdmin)
 admin.site.register(ClipTag)

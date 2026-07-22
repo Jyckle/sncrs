@@ -107,6 +107,7 @@ class Person(models.Model):
     friend_code = models.CharField(max_length=20, null=True, blank=True)
     mains = models.ManyToManyField(Character, through="PreferredCharacter")
 
+
     MEMBER = 0
     GUEST = 1
     RETIRED = 2
@@ -190,6 +191,84 @@ class Person(models.Model):
             return True
         else:
             return False
+
+class MedalQuerySet(models.QuerySet):
+    """
+    A class for operations on a set of :class:`Medal` objects.
+    """
+
+    def create_or_update_medal_counts(self, game_title: 'GameTitle', person_list: models.QuerySet = None) -> None:
+        """
+        Create or update medal counts for the given game_title, recomputing gold/silver/bronze
+        totals and the brackets they were earned at, from Placement history for each person
+        in person_list. Elite bracket (rank 1) medals are kept separate from medals earned
+        in all other bracket ranks, since the two aren't comparable.
+
+        Parameters
+        ----------
+        game_title: GameTitle
+            The game title to update medal counts for
+        person_list: models.QuerySet
+            The list of people to recompute medal totals for. If not provided, defaults to all people.
+        """
+        person_list = person_list or Person.objects.all()
+        place_to_medal = {1: 'gold', 2: 'silver', 3: 'bronze'}
+        placements = Placement.objects.filter(
+            person__in=person_list, bracket__game_title=game_title, place__in=[1, 2, 3]
+        ).select_related('bracket__sn')
+        empty_medal_brackets = lambda: {'gold': [], 'silver': [], 'bronze': []}
+        medal_brackets_by_person = defaultdict(lambda: {'elite': empty_medal_brackets(), 'challenger': empty_medal_brackets()})
+        for placement in placements:
+            bracket_shorthand = placement.bracket.shorthand() if placement.bracket else "<No Bracket found>"
+            tier = 'elite' if placement.bracket and placement.bracket.rank == 1 else 'challenger'
+            medal_brackets_by_person[placement.person_id][tier][place_to_medal[placement.place]].append(bracket_shorthand)
+        for person_id, medal_brackets in medal_brackets_by_person.items():
+            elite_medal_brackets = medal_brackets['elite']
+            challenger_medal_brackets = medal_brackets['challenger']
+            self.update_or_create(
+                person_id=person_id,
+                game_title=game_title,
+                defaults=dict(
+                    elite_gold=len(elite_medal_brackets['gold']),
+                    elite_silver=len(elite_medal_brackets['silver']),
+                    elite_bronze=len(elite_medal_brackets['bronze']),
+                    challenger_gold=len(challenger_medal_brackets['gold']),
+                    challenger_silver=len(challenger_medal_brackets['silver']),
+                    challenger_bronze=len(challenger_medal_brackets['bronze']),
+                    elite_medal_brackets=elite_medal_brackets,
+                    challenger_medal_brackets=challenger_medal_brackets,
+                )
+            )
+
+class MedalManager(models.Manager.from_queryset(MedalQuerySet)):
+    pass
+
+class Medal(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="medal_set")
+    game_title = models.ForeignKey(GameTitle, on_delete=models.SET_DEFAULT, default=get_default_game_title)
+    elite_gold = models.IntegerField(default=0)
+    elite_silver = models.IntegerField(default=0)
+    elite_bronze = models.IntegerField(default=0)
+    challenger_gold = models.IntegerField(default=0)
+    challenger_silver = models.IntegerField(default=0)
+    challenger_bronze = models.IntegerField(default=0)
+    elite_medal_brackets = models.JSONField(default=dict, blank=True)
+    challenger_medal_brackets = models.JSONField(default=dict, blank=True)
+    objects = MedalManager()
+
+    def __str__(self):
+        return (
+            f"{self.person.display_name}: "
+            f"Elite {self.elite_gold}G/{self.elite_silver}S/{self.elite_bronze}B, "
+            f"Challenger {self.challenger_gold}G/{self.challenger_silver}S/{self.challenger_bronze}B "
+            f"in {self.game_title}"
+        )
+
+    class Meta:
+        ordering = ["person", "game_title"]
+        constraints = [
+            models.UniqueConstraint(fields=["person", "game_title"], name="unique_medal_per_person_game")
+        ]
 
 class Alias(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
@@ -339,6 +418,13 @@ class SmashNight(models.Model):
     def __str__(self):
         return "{} on {}".format(self.title, self.date)
     
+    def shorthand(self):
+        season_night_count = getattr(self, 'season_night_count', None)
+        if season_night_count is None:
+            min_night_count = SmashNight.objects.filter(season=self.season).aggregate(Min('night_count'))['night_count__min']
+            season_night_count = self.night_count - min_night_count + 1
+        return f"SN {self.season}.{season_night_count} ({self.date})"
+    
     def save(self, *args, **kwargs):
         if not self.pk:
             self.night_count = SmashNight.objects.get_latest_night_count() + 1
@@ -393,6 +479,10 @@ class Bracket(models.Model):
 
     def __str__(self):
         return "{}: Bracket {}, {}".format(self.sn, self.rank, self.title)
+    
+    def shorthand(self):
+        sn_shorthand = self.sn.shorthand() if self.sn else "<No SN found>"
+        return f"{sn_shorthand}: {self.title}"
 
     def get_challonge_bracket_data(self) -> Tuple[list, list]:
         # Set up credentials to access challonge account

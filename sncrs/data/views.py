@@ -5,20 +5,20 @@ from django.db.models.functions import Lower
 from data.models import (
     Match, PersonSnapshot, Person, Team,
     StageType, SmashNight, Venue, Greeting,
-    Matchup, Clip, ClipTag, Quote, QuoteTag, Whine, 
+    Matchup, Medal, Clip, ClipTag, Quote, QuoteTag, Whine,
     SocialLink, Lesson, TwitchToken, GameTitle,
 )
 from data.serializers import (
     MatchSerializer, SnapshotSerializer, SmashNightSerializer,
-    PersonSerializer, GreetingSerializer, MatchupSerializer, ClipSerializer,
+    PersonSerializer, GreetingSerializer, MatchupSerializer, MedalSerializer, ClipSerializer,
     ClipTagSerializer, QuoteSerializer, QuoteTagSerializer, WhineSerializer,
     SocialLinkSerializer, LessonSerializer, TwitchTokenSerializer,
     GameTitleSerializer,
 )
 from data.filters import (
     MatchFilter, SnapshotFilter, SmashNightFilter, PersonFilter,
-    GreetingFilter, MatchupFilter, ClipFilter, QuoteFilter, WhineFilter,
-    SocialLinkFilter, LessonFilter, GameTitleFilter, 
+    GreetingFilter, MatchupFilter, MedalFilter, ClipFilter, QuoteFilter, WhineFilter,
+    SocialLinkFilter, LessonFilter, GameTitleFilter,
 )
 from rest_framework import generics, permissions
 
@@ -206,6 +206,11 @@ class MatchupList(generics.ListAPIView):
     queryset = Matchup.objects.all()
     serializer_class = MatchupSerializer
     filterset_class = MatchupFilter
+
+class MedalList(generics.ListAPIView):
+    queryset = Medal.objects.all()
+    serializer_class = MedalSerializer
+    filterset_class = MedalFilter
 
 class ClipList(generics.ListCreateAPIView):
     queryset = Clip.objects.all()

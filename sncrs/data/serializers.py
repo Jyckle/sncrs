@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from data.models import (
     Match, PersonSnapshot, SmashNight,
-    Person, Character, Greeting, Matchup, Clip, ClipTag,
+    Person, Character, Greeting, Matchup, Medal, Clip, ClipTag,
     Quote, QuoteTag, QuoteSpeaker, Whine, SocialLink, Site,
     Lesson, TwitchToken, GameTitle,
 )
@@ -89,6 +89,26 @@ class SocialLinkSerializer(serializers.ModelSerializer):
         model = SocialLink
         fields = ('person', 'site', 'url', 'id')
 
+class MedalSerializer(serializers.ModelSerializer):
+    person = display_name_related_serializer()
+    game_title = serializers.StringRelatedField()
+
+    class Meta:
+        model = Medal
+        fields = [
+            'id',
+            'person',
+            'game_title',
+            'elite_gold',
+            'elite_silver',
+            'elite_bronze',
+            'challenger_gold',
+            'challenger_silver',
+            'challenger_bronze',
+            'elite_medal_brackets',
+            'challenger_medal_brackets',
+        ]
+        
 class PersonSerializer(serializers.ModelSerializer):
     debut = serializers.ReadOnlyField()
     mains = serializers.SerializerMethodField()
@@ -100,6 +120,7 @@ class PersonSerializer(serializers.ModelSerializer):
         source='get_tag_display'
     )
     socials = SocialLinkSerializer(many=True)
+    medals = MedalSerializer(many=True, source='medal_set')
 
     class Meta:
         model = Person
@@ -116,6 +137,7 @@ class PersonSerializer(serializers.ModelSerializer):
             'debut',
             'mains',
             'socials',
+            'medals',
             ]
     
     def get_mains(self, obj):
