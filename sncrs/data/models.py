@@ -1496,3 +1496,12 @@ class TwitchToken(models.Model):
 
     def __str__(self):
         return self.nickname
+
+class BotCall(models.Model):
+    """Store bot calls"""
+
+    name = models.CharField(max_length=255)
+    person = models.ForeignKey(Person, null=True, blank=True, related_name="bot_calls", on_delete=models.DO_NOTHING)
+    command = models.CharField(max_length=100)
+    timestamp = models.DateTimeField()
+    full = models.TextField()

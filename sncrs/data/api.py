@@ -6,7 +6,7 @@ from data.views import (
     GreetingList, MatchupList, MedalList, ClipList, ClipTagList,
     ClipDeleteEditView, QuoteList, QuoteDeleteView, QuoteTagList,
     WhineList,SocialLinkList, LessonList, TwitchTokenList,
-    GameTitleList,
+    GameTitleList, BotCallList
 )
 
 urlpatterns = [
@@ -28,7 +28,8 @@ urlpatterns = [
     path('socials/', SocialLinkList.as_view(), name='socials'),
     path('lessons/', LessonList.as_view(), name='lessons'),
     path('twitch_tokens/', TwitchTokenList.as_view(), name='twitch_tokens'),
-    path('game_titles/', GameTitleList.as_view(), name='game_titles')
+    path('game_titles/', GameTitleList.as_view(), name='game_titles'),
+    path('bot_calls/', BotCallList.as_view(), name='bot_calls'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

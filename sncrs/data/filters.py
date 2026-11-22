@@ -4,7 +4,7 @@ from django.forms.fields import MultipleChoiceField
 from data.models import (
     Match, PersonSnapshot, SmashNight, Person,
     Greeting, Matchup, Medal, Clip, ClipTag, Quote, QuoteTag, Whine,
-    SocialLink, Lesson, GameTitle
+    SocialLink, Lesson, GameTitle, BotCall
 )
 
 class CaseInsensitiveMultipleChoiceField(MultipleChoiceField):
@@ -229,4 +229,21 @@ class GameTitleFilter(filters.FilterSet):
         model = GameTitle
         fields = [
             'name',
+        ]
+
+
+class BotCallFilter(filters.FilterSet):
+    person = filters.CharFilter(label='person', field_name="person__display_name", lookup_expr="iexact")
+    name = filters.CharFilter(label='name', lookup_expr="iexact")
+    full = filters.CharFilter(label='full', lookup_expr="icontains")
+    command = filters.CharFilter(label='command', lookup_expr="iexact")
+
+
+    class Meta:
+        model = BotCall
+        fields = [
+            'person',
+            'name',
+            'command',
+            'full',
         ]

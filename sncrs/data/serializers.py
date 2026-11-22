@@ -4,7 +4,7 @@ from data.models import (
     Match, PersonSnapshot, SmashNight,
     Person, Character, Greeting, Matchup, Medal, Clip, ClipTag,
     Quote, QuoteTag, QuoteSpeaker, Whine, SocialLink, Site,
-    Lesson, TwitchToken, GameTitle,
+    Lesson, TwitchToken, GameTitle, BotCall
 )
 
 display_name_related_serializer = lambda: serializers.SlugRelatedField(
@@ -349,3 +349,27 @@ class GameTitleSerializer(serializers.ModelSerializer):
         fields = [
             'name',
         ]
+
+
+class BotCallSerializer(serializers.ModelSerializer):
+    person = display_name_related_serializer()
+
+    class Meta:
+        model = BotCall
+        fields = [
+            'id',
+            'command',
+            'name',
+            'person',
+            'timestamp',
+            'full',
+        ]
+
+    def create(self, validated_data):
+        name = validated_data.get("name")
+        sncrs_person = Person.objects.get_person(name)
+        bot_call = BotCall.objects.create(**validated_data)
+        if sncrs_person:
+            bot_call.person = sncrs_person
+            bot_call.save()
+        return bot_call
